@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adobe E&U · Moderazione testimonianze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --adobe-red:#EB1000;--ink:#1D1D1D;--ink-soft:#4B4B4B;--ink-faint:#9A9DA3;
+    --line:#E6E6E8;--bg:#FFFFFF;--bg-soft:#FAFAFB;--bg-tint:#FFF5F3;
+    --ok:#2E8B40;--ok-soft:#E9F5EA;--warn:#B26A00;--warn-soft:#FFF3E0;
+    --radius:16px;--radius-sm:11px;--font:'Source Sans 3',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);background:var(--bg-soft);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  /* ---- gate ---- */
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:50}
+  .gate-card{width:min(92vw,380px);text-align:center}
+  .gate-card .logo{color:var(--adobe-red);font-weight:900;font-size:30px;letter-spacing:-.02em}
+  .gate-card h1{font-size:20px;font-weight:800;margin:18px 0 6px}
+  .gate-card p{color:var(--ink-faint);font-size:14px;margin-bottom:22px}
+  .gate-card input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;outline:none}
+  .gate-card input:focus{border-color:var(--adobe-red)}
+  .gate-card input.err{border-color:var(--adobe-red);background:var(--bg-tint)}
+  .gate-card button{width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;background:var(--adobe-red);color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer}
+  /* ---- header ---- */
+  header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  header .ttl{display:flex;align-items:center;gap:12px}
+  header .logo{color:var(--adobe-red);font-weight:900;font-size:22px;letter-spacing:-.02em}
+  header .ttl b{font-size:15px;font-weight:800}
+  header .ttl span{display:block;font-size:12px;color:var(--ink-faint)}
+  .live-dot{display:inline-flex;align-items:center;gap:7px;background:var(--ok-soft);color:var(--ok);font-size:13px;font-weight:700;padding:6px 12px;border-radius:99px}
+  .live-dot i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .filters button{padding:7px 14px;border:1.5px solid var(--line);background:#fff;border-radius:99px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--ink-soft)}
+  .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .filters .n{opacity:.6;font-weight:600}
+  /* ---- list ---- */
+  main{max-width:880px;margin:0 auto;padding:20px 16px 80px}
+  .empty{text-align:center;color:var(--ink-faint);padding:60px 20px;font-size:15px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);transition:opacity .2s}
+  .card.is-hidden{opacity:.5}
+  .card .q{font-size:18px;line-height:1.45;font-style:italic;color:var(--ink)}
+  .card .meta{margin-top:10px;font-size:13px;color:var(--ink-faint);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+  .card .meta b{color:var(--ink-soft);font-weight:700;font-style:normal}
+  .tag{font-size:11px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:99px;text-transform:uppercase}
+  .tag.social{background:var(--ok-soft);color:var(--ok)}
+  .tag.nosocial{background:#F0F0F2;color:#86888E}
+  .tag.appr{background:var(--ok);color:#fff}
+  .tag.wait{background:var(--warn-soft);color:var(--warn)}
+  .card .acts{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+  .btn{padding:11px 18px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink);transition:.15s}
+  .btn:hover{border-color:#c9c9cd}
+  .btn.approve{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.approve.is{background:#fff;color:var(--ok);border-color:var(--ok)}
+  .btn.hide{margin-left:auto;color:var(--ink-faint)}
+  .btn.hide.is{color:var(--adobe-red);border-color:var(--adobe-red)}
+  .note{font-size:13px;color:var(--ink-faint);margin-top:8px;padding-left:12px;border-left:3px solid var(--line)}
+  .hintbar{background:var(--bg-tint);border:1px solid #FAD9D2;border-radius:12px;padding:12px 14px;font-size:13px;color:var(--ink-soft);margin-bottom:18px}
+  .hintbar b{color:var(--adobe-red)}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="logo">Adobe</div>
+    <h1>Moderazione testimonianze</h1>
+    <p>Energy &amp; Utilities · accesso riservato</p>
+    <input id="pwd" type="password" placeholder="Password moderatore" autocomplete="off">
+    <button onclick="unlock()">Entra</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <header>
+    <div class="ttl">
+      <span class="logo">Adobe</span>
+      <div><b>Moderazione live</b><span>Energy &amp; Utilities · Milano · 18 giu 2026</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="live-dot"><i></i> IN DIRETTA · <span id="liveN">0</span></span>
+      <div class="filters">
+        <button id="f-wait" class="on" onclick="setFilter('wait')">Da approvare <span class="n" id="cWait">0</span></button>
+        <button id="f-appr" onclick="setFilter('appr')">Approvate <span class="n" id="cAppr">0</span></button>
+        <button id="f-all" onclick="setFilter('all')">Tutte <span class="n" id="cAll">0</span></button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="hintbar">
+      <b>Palco</b> = mostra le testimonianze <b>approvate</b>. &nbsp;<b>Landing pubblica</b> = solo approvate <b>con consenso social</b>. Approva qui per portarle live.
+    </div>
+    <div id="list"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+let DATA=[], FILTER='wait';
+
+function unlock(){
+  const v=document.getElementById('pwd').value;
+  if(v!==ADMIN_PWD){ document.getElementById('pwd').classList.add('err'); return; }
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  load(); subscribe(()=>load());
+}
+document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+
+async function load(){
+  DATA=(await Store.read()).filter(e=>e.quote);   // solo righe con una frase
+  render();
+}
+function setFilter(f){FILTER=f;document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('on'));document.getElementById('f-'+f).classList.add('on');render();}
+function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function render(){
+  const wait=DATA.filter(e=>!e.approved&&!e.hidden);
+  const appr=DATA.filter(e=>e.approved&&!e.hidden);
+  document.getElementById('liveN').textContent=DATA.length;
+  document.getElementById('cWait').textContent=wait.length;
+  document.getElementById('cAppr').textContent=appr.length;
+  document.getElementById('cAll').textContent=DATA.length;
+  let rows = FILTER==='wait'?wait : FILTER==='appr'?appr : DATA;
+  rows=[...rows].reverse();
+  const L=document.getElementById('list');
+  if(!rows.length){L.innerHTML='<div class="empty">Nessuna testimonianza in questa vista.</div>';return;}
+  L.innerHTML=rows.map(e=>{
+    let who='Anonimo';
+    if(e.name&&e.company)who=esc(e.name)+', '+esc(e.company);
+    else if(e.name)who=esc(e.name);else if(e.company)who=esc(e.company);
+    const social=e.social?'<span class="tag social">consenso social</span>':'<span class="tag nosocial">no social</span>';
+    const state=e.approved?'<span class="tag appr">approvata</span>':'<span class="tag wait">in attesa</span>';
+    const note=e.cap_note?`<div class="note">Nota: ${esc(e.cap_note)}</div>`:'';
+    return `<div class="card ${e.hidden?'is-hidden':''}">
+      <div class="q">\u201c${esc(e.quote)}\u201d</div>
+      <div class="meta"><b>${who}</b> ${social} ${state} ${e.email?'· \ud83d\udce9 '+esc(e.email):''}</div>
+      ${note}
+      <div class="acts">
+        <button class="btn approve ${e.approved?'is':''}" onclick="approve('${e.id}',${!e.approved})">${e.approved?'\u2713 Approvata':'Approva \u2192 palco'}</button>
+        <button class="btn hide ${e.hidden?'is':''}" onclick="hide('${e.id}',${!e.hidden})">${e.hidden?'Ripristina':'Nascondi'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function approve(id,val){
+  const ok=await setApproved(id,val);
+  if(ok){const r=DATA.find(x=>x.id===id);if(r)r.approved=val;render();}
+}
+async function hide(id,val){
+  const ok=await setHidden(id,val);
+  if(ok){const r=DATA.find(x=>x.id===id);if(r)r.hidden=val;render();}
+}
+</script>
+</body>
+</html>
