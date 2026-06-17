@@ -220,10 +220,12 @@ async function wipeData(){
     DATA=[]; render(); paintLive&&paintLive();
     alert('Fatto. Risposte cancellate: '+(data!=null?data:'?')+'.\nRicarica le altre schermate (dashboard/landing) per vederle vuote.');
   }catch(e){
+    console.error('WIPE error (oggetto completo):', e);
     const m=(e&&e.message)||'';
+    const det=[e&&e.message,e&&e.details,e&&e.hint,e&&e.code].filter(Boolean).join(' | ');
     if(m.includes('unauthorized')) alert('Password non valida per questa operazione.');
     else if(m.includes('confirm_required')) alert('Conferma mancante. Operazione annullata.');
-    else alert('Errore: la funzione di cancellazione non risponde.\nVerifica di aver eseguito la versione aggiornata di 02_admin_moderation.sql su Supabase.');
+    else alert('La cancellazione non \u00E8 andata a buon fine.\n\nDettaglio dal database:\n'+(det||'(nessun messaggio)')+'\n\n(Questo testo aiuta a capire la causa esatta.)');
   }finally{ b.textContent=old; b.disabled=false; }
 }
 </script>
