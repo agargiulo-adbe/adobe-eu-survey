@@ -218,7 +218,7 @@ async function wipeData(){
     const { data, error } = await sb.rpc('moderate_wipe_all',{ p_pwd:ADMIN_PWD, p_confirm:'CANCELLA' });
     if(error) throw error;
     DATA=[]; render(); paintLive&&paintLive();
-    alert('Fatto. Risposte cancellate: '+(data!=null?data:'?')+'.\nRicarica le altre schermate (dashboard/landing) per vederle vuote.');
+    alert('Fatto. Risposte cancellate: '+(data!=null?data:'?')+'.\n\nLa dashboard si riallinea da sola entro ~15 secondi.\nPer vederla vuota subito, ricaricala (Cmd+R).');
   }catch(e){
     console.error('WIPE error (oggetto completo):', e);
     const m=(e&&e.message)||'';

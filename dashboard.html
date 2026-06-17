@@ -587,7 +587,10 @@ function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>'
 // --- init dashboard ---
 paintQR();
 dashView=0; paintDash(); renderDash(); restartRotate();
-subscribe(()=>renderDash());            // realtime: ridisegna ad ogni cambio
+subscribe(()=>renderDash());            // realtime: ridisegna ad ogni cambio (INSERT istantanei)
+// Poll di sicurezza: riallinea la dashboard ogni 15s anche se un evento realtime
+// si perde (es. DELETE di massa dopo un wipe, che Supabase non propaga in modo affidabile).
+setInterval(()=>{ renderDash(); }, 15000);
 // fullscreen button + keyboard
 const fsb=document.getElementById('dFsBtn'); if(fsb){fsb.onclick=dashFullscreen;}
 document.addEventListener('keydown',e=>{
