@@ -106,12 +106,24 @@
 <script>
 let DATA=[], FILTER='wait';
 
-function unlock(){
+async function unlock(){
   const v=document.getElementById('pwd').value;
-  if(v!==ADMIN_PWD){ document.getElementById('pwd').classList.add('err'); return; }
+  if(!v){ document.getElementById('pwd').classList.add('err'); return; }
+  // verifica la password provandola davvero contro Supabase (RPC innocua)
+  ADMIN_PWD = v;
+  const okPwd = await testPwd();
+  if(!okPwd){ ADMIN_PWD=''; document.getElementById('pwd').classList.add('err');
+    document.getElementById('pwd').value=''; document.getElementById('pwd').placeholder='Password errata — riprova'; return; }
   document.getElementById('gate').style.display='none';
   document.getElementById('app').style.display='block';
   load(); subscribe(()=>load());
+}
+// prova la password: chiama una RPC fittizia su un id inesistente.
+// password giusta -> nessun errore (0 righe aggiornate). password errata -> eccezione 'unauthorized'.
+async function testPwd(){
+  const { error } = await sb.rpc('moderate_set_approved',
+    { p_id:'00000000-0000-0000-0000-000000000000', p_approved:false, p_pwd:ADMIN_PWD });
+  return !error;   // se la password e' sbagliata, la funzione SQL solleva un'eccezione -> error != null
 }
 document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
 
