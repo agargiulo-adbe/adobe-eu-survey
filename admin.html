@@ -56,6 +56,8 @@
   .btn{padding:11px 18px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink);transition:.15s}
   .btn:hover{border-color:#c9c9cd}
   .btn.approve{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.wipe{background:#2a2a2e;border:1px solid #444;color:#bbb;font-size:13px;padding:8px 12px}
+  .btn.wipe:hover{background:#7a1010;border-color:#a11;color:#fff}
   .btn.approve.is{background:#fff;color:var(--ok);border-color:var(--ok)}
   .btn.hide{margin-left:auto;color:var(--ink-faint)}
   .btn.hide.is{color:var(--adobe-red);border-color:var(--adobe-red)}
@@ -91,6 +93,7 @@
         <button id="f-appr" onclick="setFilter('appr')">Approvate <span class="n" id="cAppr">0</span></button>
         <button id="f-all" onclick="setFilter('all')">Tutte <span class="n" id="cAll">0</span></button>
       </div>
+      <button id="wipeBtn" class="btn wipe" onclick="wipeData()" title="Cancella tutte le risposte dal database (per test)">✕ Azzera dati</button>
     </div>
   </header>
   <main>
@@ -137,15 +140,22 @@ async function unlock(){
 // prova la password: chiama una RPC fittizia su un id inesistente.
 // password giusta -> nessun errore (0 righe aggiornate). password errata -> eccezione 'unauthorized'.
 async function testPwd(){
-  const { error } = await sb.rpc('moderate_set_approved',
-    { p_id:'00000000-0000-0000-0000-000000000000', p_approved:false, p_pwd:ADMIN_PWD });
-  if(!error) return { ok:true };
-  // distinguo "password errata" da "Supabase non configurato"
-  const msg = (error.message||'').toLowerCase();
-  if(msg.includes('unauthorized')) return { ok:false, reason:'pwd' };
-  // qualsiasi altro errore = funzione SQL assente / config errata / rete
-  console.error('Errore RPC moderazione:', error);
-  return { ok:false, reason:'config', detail:error.message };
+  // config.js non compilato? sb inesistente o URL placeholder -> errore subito chiaro
+  if(typeof sb==='undefined' || !sb || /XXXX/.test(String(SUPABASE_URL||''))){
+    return { ok:false, reason:'config', detail:'config.js non compilato (SUPABASE_URL/ANON mancanti)' };
+  }
+  try{
+    const { error } = await sb.rpc('moderate_set_approved',
+      { p_id:'00000000-0000-0000-0000-000000000000', p_approved:false, p_pwd:ADMIN_PWD });
+    if(!error) return { ok:true };
+    const msg = (error.message||'').toLowerCase();
+    if(msg.includes('unauthorized')) return { ok:false, reason:'pwd' };
+    console.error('Errore RPC moderazione:', error);
+    return { ok:false, reason:'config', detail:error.message };
+  }catch(ex){
+    console.error('Eccezione RPC moderazione:', ex);
+    return { ok:false, reason:'config', detail:String(ex&&ex.message||ex) };
+  }
 }
 document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
 
@@ -193,6 +203,28 @@ async function approve(id,val){
 async function hide(id,val){
   const ok=await setHidden(id,val);
   if(ok){const r=DATA.find(x=>x.id===id);if(r)r.hidden=val;render();}
+}
+
+async function wipeData(){
+  if(typeof sb==='undefined'||!sb){ alert('Connessione al database non disponibile.'); return; }
+  // Conferma 1
+  if(!confirm('\u26A0\uFE0F ATTENZIONE\n\nStai per CANCELLARE TUTTE le risposte dal database.\nL\u0027operazione \u00E8 IRREVERSIBILE.\n\nUsala solo per ripulire dopo un test.\n\nProcedere?')) return;
+  // Conferma 2: digitare CANCELLA
+  const typed=prompt('Per confermare, scrivi:  CANCELLA');
+  if(typed===null) return;
+  if(typed.trim().toUpperCase()!=='CANCELLA'){ alert('Conferma non corretta. Operazione annullata.'); return; }
+  const b=document.getElementById('wipeBtn'); const old=b.textContent; b.textContent='Cancello\u2026'; b.disabled=true;
+  try{
+    const { data, error } = await sb.rpc('moderate_wipe_all',{ p_pwd:ADMIN_PWD, p_confirm:'CANCELLA' });
+    if(error) throw error;
+    DATA=[]; render(); paintLive&&paintLive();
+    alert('Fatto. Risposte cancellate: '+(data!=null?data:'?')+'.\nRicarica le altre schermate (dashboard/landing) per vederle vuote.');
+  }catch(e){
+    const m=(e&&e.message)||'';
+    if(m.includes('unauthorized')) alert('Password non valida per questa operazione.');
+    else if(m.includes('confirm_required')) alert('Conferma mancante. Operazione annullata.');
+    else alert('Errore: la funzione di cancellazione non risponde.\nVerifica di aver eseguito la versione aggiornata di 02_admin_moderation.sql su Supabase.');
+  }finally{ b.textContent=old; b.disabled=false; }
 }
 </script>
 </body>

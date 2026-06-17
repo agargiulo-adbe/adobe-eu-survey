@@ -217,17 +217,23 @@
   .d-live{display:inline-flex;align-items:center;gap:.8vh;background:rgba(235,16,0,.16);color:#FF6B4D;
     padding:1.1vh 2vh;border-radius:99px;font-size:2vh;font-weight:800;letter-spacing:.05em}
   .d-live .d{width:.9vh;height:.9vh;border-radius:99px;background:#EB1000;animation:pulse 1.4s infinite}
-  .d-qr{display:flex;align-items:center;gap:1.4vh;background:#fff;border-radius:1.4vh;padding:1vh 1.6vh}
-  .d-qr .qbox{width:6vh;height:6vh;border-radius:.6vh;background:#000;display:grid;
-    grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:.3vh;padding:.5vh}
-  .d-qr .qbox i{background:#fff;border-radius:1px}
-  .d-qr .qt{font-size:1.5vh;font-weight:800;color:#111;line-height:1.2}
-  .d-qr .qt small{display:block;font-size:1.2vh;color:#666;font-weight:700;margin-top:.2vh}
 
   .d-stage{flex:1;position:relative;padding:0 3.4vw 2vh}
   .d-view{position:absolute;inset:0;padding:0 3.4vw 2vh;opacity:0;transform:translateY(20px);
     pointer-events:none;transition:opacity .5s ease,transform .5s ease;display:flex;flex-direction:column}
   .d-view.on{opacity:1;transform:none;pointer-events:auto}
+
+  /* ===== VIEW 0: maxi QR partecipazione ===== */
+  .qr-maxi{height:100%;display:grid;grid-template-columns:1fr auto;align-items:center;gap:5vw;padding:0 1vw}
+  .qm-left{display:flex;flex-direction:column;gap:2.2vh}
+  .qm-title{font-size:5.4vh;line-height:1.05;font-weight:800;letter-spacing:-.5px;margin:.4vh 0 0}
+  .qm-sub{font-size:2.5vh;line-height:1.35;color:#B8B8BE;margin:0;font-weight:500}
+  .qm-url{margin-top:1vh;font-size:2.1vh;font-weight:700;color:#fff;background:#1b1b1f;border:1px solid #303036;
+          padding:1.1vh 1.8vh;border-radius:12px;display:inline-block;letter-spacing:.2px}
+  .qm-right{display:flex;align-items:center;justify-content:center}
+  .qm-card{background:#fff;border-radius:28px;padding:3.2vh;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+  .qm-img{display:block;width:52vh;height:52vh;image-rendering:pixelated}
+
   .d-vhead{flex:none;display:flex;align-items:baseline;gap:1.4vh;margin-bottom:2vh}
   .d-vhead h2{font-size:4.2vh;font-weight:900;letter-spacing:-.02em}
   .d-vhead .vk{font-size:2vh;font-weight:800;color:#EB1000;letter-spacing:.08em;text-transform:uppercase}
@@ -384,10 +390,6 @@ body.prod-dash .qbox.qr-real img,body.prod-dash .qbox.qr-real canvas{width:100%!
   <div class="screen169">
     <div class="d-top">
       <div><div class="logo">Adobe</div><div class="ctx">Energy &amp; Utilities · Live Audience</div></div>
-      <div class="d-qr">
-        <div class="qbox" id="qrMini"></div>
-        <div class="qt">Partecipa ora<small>Inquadra il QR →</small></div>
-      </div>
       <div class="d-toprt">
         <div class="d-live"><span class="d"></span>IN DIRETTA · <span id="dLiveN">0</span></div>
         <button class="d-fs" id="dFsBtn" onclick="dashFullscreen()" title="Schermo intero (F)">
@@ -398,8 +400,23 @@ body.prod-dash .qbox.qr-real img,body.prod-dash .qbox.qr-real canvas{width:100%!
     </div>
 
     <div class="d-stage">
-      <!-- VIEW 1: PULSE -->
+      <!-- VIEW 0: PARTECIPA (maxi QR) -->
       <div class="d-view on" data-view="0">
+        <div class="qr-maxi">
+          <div class="qm-left">
+            <h2 class="qm-title">La tua opinione conta.<br>Lasciala adesso.</h2>
+            <p class="qm-sub">Inquadra il QR con la fotocamera del telefono.<br>6 domande, 30 secondi.</p>
+          </div>
+          <div class="qm-right">
+            <div class="qm-card">
+              <img class="qm-img" alt="QR sondaggio" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgQAAAIECAIAAADpYKHBAAAKP0lEQVR4nO3cS27sShIFQVdD+9+yev4GAgEl4kayzBZQZLE+jpycr5+fnwD4bP/71zcAwL8nBgCIAQBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAED1PXmxr6+vycut8vPzc+R1njzDJ9c69TqnnPpubHvv2651yo3fjRtNPmcnAwDEAAAxACAxACAxACAxACAxACAxACAxACAxACAxAKDhbaInJrc4Tjm1nfLJe0GnNoW2PcNTPnmf5wmf6d85GQAgBgCIAQCJAQCJAQCJAQCJAQCJAQCJAQCJAQCJAQAt3CZ6YnLTY3Lz5NQ+z+QW0LZ7PmXbPW/7vG7cgHrr/8YpTgYAiAEAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAl24TfbJTmyeTOy1PTG7dbNvVOfVZbNvR4i5OBgCIAQBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEBiAEC2iVaZ3Mx58jpP7mdyV+fG/aLJ15m0bd+Jv3MyAEAMABADABIDABIDABIDABIDABIDABIDABIDABIDALp0m+itmyfb9nkmn/Op7Z3JLaBtu0PbdqK27Re99X/jFCcDAMQAADEAIDEAIDEAIDEAIDEAIDEAIDEAIDEAIDEAoIXbRKf2VW40uXXjdWZe55Rt72vb8/nk/41TnAwAEAMAxACAxACAxACAxACAxACAxACAxACAxACAxACAhreJnuyZfLJPfj437uGcMvm5n3o+23aZ+DsnAwDEAAAxACAxACAxACAxACAxACAxACAxACAxACAxAKD62raLcmp/5sbX4Xfb9ou2faa+z7+bfF83PkMnAwDEAAAxACAxACAxACAxACAxACAxACAxACAxACAxAKD6/tc38F/b9lW2bYy8dZ/n1P2cep1Ttn1ep3zy7+LJ69z43+JkAIAYACAGACQGACQGACQGACQGACQGACQGACQGACQGALRwm+jUFsdb94smt0pOmdzV2fZ8tt3Ptj2cJyZ3q7ZtbU1yMgBADAAQAwASAwASAwASAwASAwASAwASAwASAwASAwCqr7fukDyx7b3zu1PfjbfuVm3bw5n8fW3bXNp2P084GQAgBgCIAQCJAQCJAQCJAQCJAQCJAQCJAQCJAQCJAQDV9+TFtm3L3Lg/M8muzu8m7/nG5/PE5H/CE9u+85P/G04GAIgBAGIAQGIAQGIAQGIAQGIAQGIAQGIAQGIAQGIAQMPbRNv2Xk65cXfolG3bMpMmv883bmR98m/5xv86JwMAxAAAMQAgMQAgMQAgMQAgMQAgMQAgMQAgMQAgMQCg+rpxE+aJbZswN17rRtv2eZ44dc83fjcm3/up9zW5KTT5WTgZACAGAIgBAIkBAIkBAIkBAIkBAIkBAIkBAIkBAIkBAF26TfTWDZYnJvdVJjdhtj2fJ7Zt1Gzb59n2ud+4WzXJyQAAMQBADABIDABIDABIDABIDABIDABIDABIDABIDABoeJvorVsu2zZhtrlx72XbZs6pa52y7bf8hM/0d04GAIgBAGIAQGIAQGIAQGIAQGIAQGIAQGIAQGIAQGIAQPX9r2/gv7btfty4X7Rty+XGnRY+0+RvcNvOmJMBAGIAgBgAkBgAkBgAkBgAkBgAkBgAkBgAkBgAkBgA0PA20Vu3ZbZtjDwxuZX01mtNuvGeTzn1mU4+wxv/E5wMABADAMQAgMQAgMQAgMQAgMQAgMQAgMQAgMQAgMQAgIa3iU7tdTzZGJncBvnkXZ1T93zjftGT19n2fLb9Bifvedvva9tv2ckAADEAQAwASAwASAwASAwASAwASAwASAwASAwASAwAqL4m9zG27c9sc+N7/+TdoVO2fe7bns8T23Z+buRkAIAYACAGACQGACQGACQGACQGACQGACQGACQGACQGADS8TfTEW7dl3M/fTW7vPDH5Xd12z6euNemTP4snnAwAEAMAxACAxACAxACAxACAxACAxACAxACAxACAxACAhreJtm253LjPc8q2nZ9Jn7w/88S2e972XX3r/4aTAQBiAIAYAJAYAJAYAJAYAJAYAJAYAJAYAJAYAJAYANDCbaInbtwd+uT7easbfzunTG6IneJ+fudkAIAYACAGACQGACQGACQGACQGACQGACQGACQGACQGAFTfkxc7tWeybdPjxvt5YnLjaHLrZtvOzxM3Pp9T3/nJ39e23/IkJwMAxAAAMQAgMQAgMQAgMQAgMQAgMQAgMQAgMQAgMQCg+rpxZ+PGPZxTPnlXZ5sb94ImbftdbLufJybv2ckAADEAQAwASAwASAwASAwASAwASAwASAwASAwASAwAqL4nLza5HzK597JtN2bbBsu25/PE5Pdwkj2uPdfaxskAADEAQAwASAwASAwASAwASAwASAwASAwASAwASAwAqL62bads20U55dT72radcuNGzeQ+z7Z7nrTtd/rW/5ZTnAwAEAMAxACAxACAxACAxACAxACAxACAxACAxACAxACAhreJtm2DTO7PbHtfp3zyZs5bd4e2PZ9tJp/P5P+GkwEAYgCAGACQGACQGACQGACQGACQGACQGACQGACQGABQfU9ebHJn44lT93PjVsnkZ3Hj89lm20bW5C7TKW/dSjrFyQAAMQBADABIDABIDABIDABIDABIDABIDABIDABIDABoeJvok7dBnmywTO4ObfssTj2fbftF2+552/N54q33vI2TAQBiAIAYAJAYAJAYAJAYAJAYAJAYAJAYAJAYAJAYANDwNtET2zZGnrhxh+SJyV2dU89w2/dn8rtx4+bSqWttc+M9OxkAIAYAiAEAiQEAiQEAiQEAiQEAiQEAiQEAiQEAiQEALdwmeuKtey83brm89VqTn8Vbt62eeOt7P7XZNcnJAAAxAEAMAEgMAEgMAEgMAEgMAEgMAEgMAEgMAEgMAOjSbaK3OrVjM7n3sm2D5cb7OfU6p74/k3tKpz6LG7/z276rTgYAiAEAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAtolWuXHvZdsGy+SWy6Rtz2dyR+vJtSb3lN7KyQAAMQBADABIDABIDABIDABIDABIDABIDABIDABIDADo0m0i+zN/N7kX9MTkDtITN17rxtd5Ytum0Lbnc4qTAQBiAIAYAJAYAJAYAJAYAJAYAJAYAJAYAJAYAJAYANDCbaJtOySTJrduTtm2z3PKtmttez6Ttm34nLJtv8jJAAAxAEAMAEgMAEgMAEgMAEgMAEgMAEgMAEgMAEgMAKi+3rr7AcBzTgYAiAEAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBAYgBA9X+wyeUMDg6KTwAAAABJRU5ErkJggg==">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 1: PULSE -->
+      <div class="d-view" data-view="1">
         <div class="d-vhead"><span class="vk">Live pulse</span><h2>La sala, in tempo reale</h2></div>
         <div class="pulse-grid">
           <div class="pulse-hero"><div class="pn" id="pHero">0</div><div class="pl">risposte raccolte</div></div>
@@ -411,19 +428,19 @@ body.prod-dash .qbox.qr-real img,body.prod-dash .qbox.qr-real canvas{width:100%!
       </div>
 
       <!-- VIEW 2: FASI -->
-      <div class="d-view" data-view="1">
+      <div class="d-view" data-view="2">
         <div class="d-vhead"><span class="vk">Le fasi del journey</span><h2>Quale fase conta di più</h2></div>
         <div class="big-bars" id="v2bars"></div>
       </div>
 
       <!-- VIEW 3: AREE FOLLOW-UP -->
-      <div class="d-view" data-view="2">
+      <div class="d-view" data-view="3">
         <div class="d-vhead"><span class="vk">Temi di interesse</span><h2>I temi più richiesti</h2></div>
         <div class="big-bars" id="v3bars"></div>
       </div>
 
       <!-- VIEW 4: QUOTE + VOTI -->
-      <div class="d-view" data-view="3">
+      <div class="d-view" data-view="4">
         <div class="d-vhead"><span class="vk">La voce della sala</span><h2>Testimonianze &amp; valutazioni</h2></div>
         <div class="split">
           <div class="split-l"><div class="sl-h">Testimonianze dal vivo</div><div class="qfeed169" id="v4quotes"></div></div>
@@ -479,7 +496,7 @@ async function renderDash(){
   // ---- VIEW 4: quotes + ratings ----
   const qs=d.filter(e=>e.quote&&e.approved).slice(-3).reverse();
   const qf=document.getElementById('v4quotes');
-  if(!qs.length){qf.innerHTML='<div class="d-empty" style="font-size:1.8vh">Le testimonianze approvate compariranno qui\u2026</div>';}
+  if(!qs.length){qf.innerHTML='<div class="d-empty" style="font-size:1.8vh">Le testimonianze appariranno qui\u2026</div>';}
   else qf.innerHTML=qs.map(e=>{
     let a='Partecipante anonimo';
     if(e.name&&e.company)a=e.name+', '+e.company;else if(e.name)a=e.name;else if(e.company)a=e.company;
@@ -512,7 +529,7 @@ function setT(id,v){const el=document.getElementById(id);if(el)el.textContent=v;
 
 let dashView=0, dashRotate=null;
 
-const DASH_VIEWS=4, DASH_MS=12000;
+const DASH_VIEWS=5, DASH_MS=12000;
 
 function paintDash(){
   document.querySelectorAll('.d-view').forEach(v=>v.classList.toggle('on',+v.dataset.view===dashView));
@@ -524,12 +541,12 @@ function dashGo(i){dashView=(i+DASH_VIEWS)%DASH_VIEWS;paintDash();restartRotate(
 
 function dashNav(dir){dashGo(dashView+dir);}
 
-function restartRotate(){if(dashRotate)clearInterval(dashRotate);dashRotate=setInterval(()=>{dashView=(dashView+1)%DASH_VIEWS;paintDash();},DASH_MS);}
+function restartRotate(){if(dashRotate)clearInterval(dashRotate);dashRotate=setInterval(()=>{let n=(dashView+1)%DASH_VIEWS; if(n===0)n=1; dashView=n; paintDash();},DASH_MS);}
 
 function stopRotate(){if(dashRotate){clearInterval(dashRotate);dashRotate=null;}}
 // decorative faux-QR (real QR = GitHub Pages URL at event)
 
-function paintQR(){
+function paintQR(){ return; /* QR ora e' immagine fissa embedded */
   const q=document.getElementById('qrMini');if(!q||q.children.length)return;
   // QR reale se SURVEY_URL e libreria disponibili
   if(typeof SURVEY_URL!=='undefined' && SURVEY_URL && typeof QRCode!=='undefined'){
