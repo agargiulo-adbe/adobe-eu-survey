@@ -421,9 +421,9 @@ body.prod-dash .qbox.qr-real img,body.prod-dash .qbox.qr-real canvas{width:100%!
         <div class="pulse-grid">
           <div class="pulse-hero"><div class="pn" id="pHero">0</div><div class="pl">risposte raccolte</div></div>
           <div class="pulse-kpi"><div class="kn gold" id="pMat">0.0</div><div class="kl">Maturità CX media /5</div></div>
-          <div class="pulse-kpi"><div class="kn red" id="pLeads">0</div><div class="kl">Contatti / lead</div></div>
+          <div class="pulse-kpi"><div class="kn red" id="pTopTheme" style="font-size:2.7vh;line-height:1.12">—</div><div class="kl">Tema #1 della sala</div></div>
           <div class="pulse-kpi"><div class="kn green" id="pQuotes">0</div><div class="kl">Quote raccolte</div></div>
-          <div class="pulse-kpi"><div class="kn" id="pPub">0</div><div class="kl">Quote pubblicabili</div></div>
+          <div class="pulse-kpi"><div class="kn gold" id="pVote">—</div><div class="kl">Voto medio interventi</div></div>
         </div>
       </div>
 
@@ -484,9 +484,13 @@ async function renderDash(){
   // ---- VIEW 1: pulse ----
   setT('pHero',tot);
   setT('pMat', d.length?avgMat(d):'0.0');
-  setT('pLeads', d.filter(e=>e.email).length);
   setT('pQuotes', d.filter(e=>e.quote).length);
-  setT('pPub', d.filter(e=>e.quote&&e.social).length);
+  // Tema #1 della sala (top benefit Q3, live)
+  const topTheme=CAPS.map(([lab,benefit])=>({benefit,n:d.filter(e=>(e.q3||[]).includes(lab)).length})).sort((a,b)=>b.n-a.n)[0];
+  setT('pTopTheme', (topTheme&&topTheme.n>0)?topTheme.benefit:'\u2014');
+  // Voto medio interventi (media stelle Q5 sui talk votati)
+  const allRates=TALKS.map(([k])=>avgRating(d,k)).filter(x=>x>0);
+  setT('pVote', allRates.length?(allRates.reduce((a,b)=>a+b,0)/allRates.length).toFixed(1)+'\u2009\u2605':'\u2014');
   // ---- VIEW 2: fasi (TOPICS, q1 single) ----
   const ph=TOPICS.map(([lab,val])=>({lab,n:d.filter(e=>e.q1===val).length})).sort((a,b)=>b.n-a.n);
   document.getElementById('v2bars').innerHTML=bigBars(ph,tot,false);
