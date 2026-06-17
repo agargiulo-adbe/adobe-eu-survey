@@ -7,8 +7,10 @@
 const SUPABASE_URL  = "https://vqtslejptdpafidbiyuv.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxdHNsZWpwdGRwYWZpZGJpeXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTY3MDEsImV4cCI6MjA5NzI3MjcwMX0.-rCleuBvGe-NxbEyU4tWdK-XhKJ2zsMEpaKP_uzh2do";   // anon public key
 
-// >>> 2. STESSA password messa in 02_admin_moderation.sql <<<
-const ADMIN_PWD = "AdobeEU2026!";
+// >>> 2. La password admin NON sta qui (repo pubblico!). 
+//        Vive solo nella funzione SQL (02_admin_moderation.sql) e viene
+//        digitata in admin.html ad ogni sessione. <<<
+let ADMIN_PWD = "";   // riempita a runtime dal gate di admin.html
 
 // >>> URL pubblico della survey (per il QR sul palco). Lascia vuoto per QR decorativo. <<<
 const SURVEY_URL = "";   // es. "https://tuo-utente.github.io/adobe-eu-survey/"

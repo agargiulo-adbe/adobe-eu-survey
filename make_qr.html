@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genera QR survey — Adobe E&U</title>
+<style>
+  body{font-family:'Source Sans 3',system-ui,sans-serif;background:#FAFAFB;color:#1D1D1D;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .card{background:#fff;border:1px solid #E6E6E8;border-radius:18px;padding:32px;width:min(92vw,460px);box-shadow:0 4px 24px rgba(0,0,0,.07);text-align:center}
+  .logo{color:#EB1000;font-weight:900;font-size:26px;letter-spacing:-.02em}
+  h1{font-size:19px;margin:14px 0 4px}
+  p{color:#9A9DA3;font-size:14px;margin:0 0 20px}
+  input{width:100%;padding:13px 15px;border:1.5px solid #E6E6E8;border-radius:11px;font-size:15px;font-family:inherit;outline:none;box-sizing:border-box}
+  input:focus{border-color:#EB1000}
+  button{margin-top:12px;width:100%;padding:13px;border:none;border-radius:11px;background:#EB1000;color:#fff;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer}
+  #qr{margin:24px auto 8px;width:300px;height:300px;display:flex;align-items:center;justify-content:center}
+  #qr canvas,#qr img{width:300px!important;height:300px!important}
+  a.dl{display:inline-block;margin-top:8px;font-size:14px;font-weight:700;color:#EB1000;text-decoration:none}
+  .hint{font-size:12px;color:#9A9DA3;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Adobe</div>
+  <h1>QR della survey</h1>
+  <p>Incolla l'URL pubblico della survey (GitHub Pages)</p>
+  <input id="url" placeholder="https://tuo-utente.github.io/adobe-eu-survey/" value="">
+  <button onclick="gen()">Genera QR</button>
+  <div id="qr"></div>
+  <a id="dl" class="dl" style="display:none" download="qr-survey-adobe-eu.png">⬇ Scarica PNG</a>
+  <div class="hint">Inserisci il PNG nella slide di chiusura del deck.</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+function gen(){
+  const url=document.getElementById('url').value.trim();
+  if(!url){alert('Inserisci un URL');return;}
+  const box=document.getElementById('qr');box.innerHTML='';
+  new QRCode(box,{text:url,width:300,height:300,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  setTimeout(()=>{
+    const img=box.querySelector('img')||box.querySelector('canvas');
+    if(img){const data=img.tagName==='IMG'?img.src:img.toDataURL('image/png');
+      const a=document.getElementById('dl');a.href=data;a.style.display='inline-block';}
+  },300);
+}
+</script>
+</body>
+</html>

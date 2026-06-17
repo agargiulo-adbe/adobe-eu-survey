@@ -111,9 +111,25 @@ async function unlock(){
   if(!v){ document.getElementById('pwd').classList.add('err'); return; }
   // verifica la password provandola davvero contro Supabase (RPC innocua)
   ADMIN_PWD = v;
-  const okPwd = await testPwd();
-  if(!okPwd){ ADMIN_PWD=''; document.getElementById('pwd').classList.add('err');
-    document.getElementById('pwd').value=''; document.getElementById('pwd').placeholder='Password errata — riprova'; return; }
+  const btn = document.querySelector('#gate button');
+  const prevLabel = btn.textContent; btn.textContent='Verifico\u2026'; btn.disabled=true;
+  const res = await testPwd();
+  btn.textContent=prevLabel; btn.disabled=false;
+  if(!res.ok){
+    ADMIN_PWD='';
+    const p=document.getElementById('pwd'); p.classList.add('err'); p.value='';
+    if(res.reason==='config'){
+      p.placeholder='Errore di connessione a Supabase \u2014 controlla config.js e gli SQL';
+      let w=document.getElementById('gateWarn');
+      if(!w){ w=document.createElement('div'); w.id='gateWarn';
+        w.style.cssText='margin-top:14px;font-size:13px;line-height:1.5;color:#B91C1C;text-align:left;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 14px';
+        document.querySelector('#gate .card, #gate').appendChild(w); }
+      w.textContent='Le funzioni di moderazione non rispondono. Verifica di aver eseguito 02_admin_moderation.sql su Supabase e che config.js punti al progetto giusto.';
+    } else {
+      p.placeholder='Password errata \u2014 riprova';
+    }
+    return;
+  }
   document.getElementById('gate').style.display='none';
   document.getElementById('app').style.display='block';
   load(); subscribe(()=>load());
@@ -123,7 +139,13 @@ async function unlock(){
 async function testPwd(){
   const { error } = await sb.rpc('moderate_set_approved',
     { p_id:'00000000-0000-0000-0000-000000000000', p_approved:false, p_pwd:ADMIN_PWD });
-  return !error;   // se la password e' sbagliata, la funzione SQL solleva un'eccezione -> error != null
+  if(!error) return { ok:true };
+  // distinguo "password errata" da "Supabase non configurato"
+  const msg = (error.message||'').toLowerCase();
+  if(msg.includes('unauthorized')) return { ok:false, reason:'pwd' };
+  // qualsiasi altro errore = funzione SQL assente / config errata / rete
+  console.error('Errore RPC moderazione:', error);
+  return { ok:false, reason:'config', detail:error.message };
 }
 document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
 
