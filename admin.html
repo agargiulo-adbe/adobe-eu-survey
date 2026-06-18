@@ -425,13 +425,19 @@ async function addMaterial(){
   finally{ b.disabled=false; }
 }
 async function matPub(id,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); try{await LP.materials.update(id,{published:v});renderMateriali();refreshCounts();}catch(e){alert(e.message);} }
-async function matDel(id){ if(!confirm('Eliminare il materiale?'))return; try{await LP.materials.remove(id);renderMateriali();refreshCounts();}catch(e){alert(e.message);} }
+async function matDel(id){ if(!confirm('Eliminare il materiale?'))return;
+  try{
+    const m=(window._mats||[]).find(x=>x.id===id);
+    if(m && !m.is_external){ const p=LP.storage.pathFromUrl(m.url); if(p){ try{await LP.storage.remove([p]);}catch(e){} } }
+    await LP.materials.remove(id); renderMateriali(); refreshCounts();
+  }catch(e){alert(e.message);} }
 async function matMove(id,dir){ const a=window._mats,i=a.findIndex(m=>m.id===id),j=i+dir; if(j<0||j>=a.length)return;
   await Promise.all([LP.materials.update(a[i].id,{sort_order:a[j].sort_order}),LP.materials.update(a[j].id,{sort_order:a[i].sort_order})]); renderMateriali(); }
 
 /* ================= JOURNEY (zip microsite) ================= */
 async function renderJourney(){
   const micros=await LP.microsites.list(EV.id);
+  window._micros=micros;
   el('p-journey').innerHTML=`
    <div class="hintbar"><b>Microsite</b>: carica uno zip che contiene un sito HTML (es. <code>journey_v5/journey_v05.html</code>). I file vengono scompattati e ospitati su Storage, poi mostrati nel recap in un viewer navigabile.</div>
    <div class="box">
@@ -451,7 +457,7 @@ async function renderJourney(){
       <div class="it-acts">
         <span class="tag ${m.published?'pub':'draft'}">${m.published?'live':'bozza'}</span>
         <button class="sw ${m.published?'on':''}" onclick="jPub('${m.id}',this)"></button>
-        <a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">Apri</a>
+        <button class="btn sm" onclick="jOpen('${u}')">Apri</button>
         <button class="btn sm danger" onclick="jDel('${m.id}')">✕</button>
       </div></div>`;}).join('');
 }
@@ -493,8 +499,24 @@ async function uploadMicrosite(){
   }catch(e){ console.error(e); msg.textContent=''; alert('Errore upload microsite: '+e.message); }
   finally{ b.disabled=false; }
 }
+// Anteprima microsite: Storage serve l'HTML come text/plain → carico via Blob con <base>.
+async function jOpen(url){
+  try{
+    const res=await fetch(url); let html=await res.text();
+    const base=url.replace(/[^/]*$/,''); const bt=`<base href="${base}">`;
+    if(/<base\s/i.test(html)) html=html.replace(/<base\s[^>]*>/i,bt);
+    else if(/<head[^>]*>/i.test(html)) html=html.replace(/<head([^>]*)>/i,`<head$1>${bt}`);
+    else html=bt+html;
+    window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');
+  }catch(e){ alert('Errore preview: '+e.message); }
+}
 async function jPub(id,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); try{await LP.microsites.update(id,{published:v});renderJourney();}catch(e){alert(e.message);} }
-async function jDel(id){ if(!confirm('Eliminare il microsite? (i file su Storage restano)'))return; try{await LP.microsites.remove(id);renderJourney();}catch(e){alert(e.message);} }
+async function jDel(id){ if(!confirm('Eliminare il microsite e i suoi file su Storage?'))return;
+  try{
+    const m=(window._micros||[]).find(x=>x.id===id);
+    if(m && m.storage_prefix){ try{await LP.storage.removePrefix(m.storage_prefix);}catch(e){console.warn('removePrefix',e);} }
+    await LP.microsites.remove(id); renderJourney();
+  }catch(e){alert(e.message);} }
 
 /* ================= FOTO ================= */
 async function renderFoto(){
@@ -533,7 +555,12 @@ async function uploadPhotos(){
 }
 async function photoCap(id,v){ try{await LP.photos.update(id,{caption:v});}catch(e){alert(e.message);} }
 async function photoPub(id,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); try{await LP.photos.update(id,{published:v});}catch(e){alert(e.message);} }
-async function photoDel(id){ if(!confirm('Eliminare la foto?'))return; try{await LP.photos.remove(id);renderFoto();refreshCounts();}catch(e){alert(e.message);} }
+async function photoDel(id){ if(!confirm('Eliminare la foto?'))return;
+  try{
+    const p=(window._photos||[]).find(x=>x.id===id);
+    if(p && p.storage_path){ try{await LP.storage.remove([p.storage_path]);}catch(e){} }
+    await LP.photos.remove(id); renderFoto(); refreshCounts();
+  }catch(e){alert(e.message);} }
 async function photoMove(id,dir){ const a=window._photos,i=a.findIndex(p=>p.id===id),j=i+dir; if(j<0||j>=a.length)return;
   await Promise.all([LP.photos.update(a[i].id,{sort_order:a[j].sort_order}),LP.photos.update(a[j].id,{sort_order:a[i].sort_order})]); renderFoto(); }
 

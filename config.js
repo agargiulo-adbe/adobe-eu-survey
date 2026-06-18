@@ -131,12 +131,33 @@ const LP = {
 
   // ----- storage -----
   storage: {
+    // deduce il MIME dall'estensione: i blob da JSZip non hanno `type`, e senza
+    // content-type Supabase Storage serve i file come text/plain (microsite non renderizzato).
+    mime(name){
+      const ext = (name.split('.').pop()||'').toLowerCase();
+      const M = {
+        html:'text/html; charset=utf-8', htm:'text/html; charset=utf-8',
+        js:'text/javascript; charset=utf-8', mjs:'text/javascript; charset=utf-8',
+        css:'text/css; charset=utf-8', json:'application/json',
+        svg:'image/svg+xml', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg',
+        gif:'image/gif', webp:'image/webp', ico:'image/x-icon',
+        mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime', mp3:'audio/mpeg',
+        woff:'font/woff', woff2:'font/woff2', ttf:'font/ttf', otf:'font/otf', eot:'application/vnd.ms-fontobject',
+        pdf:'application/pdf', txt:'text/plain; charset=utf-8',
+        xml:'application/xml', map:'application/json',
+        doc:'application/msword', xls:'application/vnd.ms-excel', ppt:'application/vnd.ms-powerpoint',
+        docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      };
+      return M[ext] || 'application/octet-stream';
+    },
     publicUrl(path){
       return sb.storage.from(ASSET_BUCKET).getPublicUrl(path).data.publicUrl;
     },
     async upload(path, fileOrBlob, opts){
       const o = Object.assign({ upsert:true, cacheControl:'3600' }, opts||{});
-      if(fileOrBlob && fileOrBlob.type) o.contentType = fileOrBlob.type;
+      o.contentType = (fileOrBlob && fileOrBlob.type) || LP.storage.mime(path);
       const { error } = await sb.storage.from(ASSET_BUCKET).upload(path, fileOrBlob, o);
       if(error) throw error;
       return LP.storage.publicUrl(path);
@@ -147,8 +168,8 @@ const LP = {
       let done = 0;
       for(const f of files){
         const full = prefix.replace(/\/$/,'') + '/' + f.path.replace(/^\//,'');
-        const o = { upsert:true, cacheControl:'3600' };
-        if(f.blob && f.blob.type) o.contentType = f.blob.type;
+        const o = { upsert:true, cacheControl:'3600',
+          contentType: (f.blob && f.blob.type) || LP.storage.mime(f.path) };
         const { error } = await sb.storage.from(ASSET_BUCKET).upload(full, f.blob, o);
         if(error) throw new Error(f.path + ': ' + error.message);
         done++; if(onProgress) onProgress(done, files.length);
@@ -158,6 +179,30 @@ const LP = {
     async remove(paths){
       const { error } = await sb.storage.from(ASSET_BUCKET).remove([].concat(paths));
       if(error) throw error;
+    },
+    // ricava lo storage path da un public URL (per cancellare il file di un materiale)
+    pathFromUrl(url){
+      const marker = '/storage/v1/object/public/' + ASSET_BUCKET + '/';
+      const i = (url||'').indexOf(marker);
+      return i>=0 ? decodeURIComponent(url.slice(i+marker.length)) : null;
+    },
+    // elimina ricorsivamente tutti i file sotto un prefix (es. un microsite)
+    async removePrefix(prefix){
+      const root = prefix.replace(/\/$/,'');
+      const files = [];
+      async function walk(p){
+        const { data } = await sb.storage.from(ASSET_BUCKET).list(p, { limit:1000 });
+        for(const it of (data||[])){
+          const full = p ? p+'/'+it.name : it.name;
+          if(it.id===null) await walk(full);   // cartella
+          else files.push(full);
+        }
+      }
+      await walk(root);
+      for(let i=0;i<files.length;i+=100){
+        await sb.storage.from(ASSET_BUCKET).remove(files.slice(i,i+100));
+      }
+      return files.length;
     }
   },
 

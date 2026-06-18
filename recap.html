@@ -539,18 +539,40 @@ function openMaterial(id){
   window.open(url,'_blank','noopener');
 }
 
-/* ---- journey microsite ---- */
-function launchJourney(){
-  const f=document.getElementById('jFrame'); if(!f||!JOURNEY_URL) return;
-  f.src=JOURNEY_URL;
-  const c=document.getElementById('jCover'); if(c) c.style.display='none';
+/* ---- journey microsite ----
+   Supabase Storage serve l'HTML come text/plain (sicurezza), quindi l'iframe non
+   lo renderizzerebbe. Soluzione: scarico l'HTML, inietto <base href> verso lo Storage
+   (così gli asset relativi — serviti col MIME giusto — si risolvono) e lo carico come
+   Blob text/html. */
+async function buildJourneyBlob(){
+  if(window._journeyBlob) return window._journeyBlob;
+  if(!JOURNEY_URL) return null;
+  const res=await fetch(JOURNEY_URL);
+  let html=await res.text();
+  const base=JOURNEY_URL.replace(/[^/]*$/,'');           // dir dell'entry su Storage
+  const baseTag=`<base href="${base}">`;
+  if(/<base\s/i.test(html)) html=html.replace(/<base\s[^>]*>/i,baseTag);
+  else if(/<head[^>]*>/i.test(html)) html=html.replace(/<head([^>]*)>/i,`<head$1>${baseTag}`);
+  else html=baseTag+html;
+  window._journeyBlob=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  return window._journeyBlob;
 }
-function fsJourney(){
-  const el=document.getElementById('jFrame');
-  if(!el) return;
-  if(!el.src) launchJourney();
-  const r=el.requestFullscreen||el.webkitRequestFullscreen;
-  if(r) r.call(el);
+async function launchJourney(){
+  const f=document.getElementById('jFrame'); if(!f||!JOURNEY_URL) return;
+  const c=document.getElementById('jCover');
+  if(c){ c.style.pointerEvents='none'; const t=c.querySelector('.pl-d'); if(t)t.textContent='Caricamento…'; }
+  try{ const blob=await buildJourneyBlob(); if(blob) f.src=blob; else f.src=JOURNEY_URL; }
+  catch(e){ console.error('journey load',e); f.src=JOURNEY_URL; }
+  if(c) c.style.display='none';
+}
+async function fsJourney(){
+  const f=document.getElementById('jFrame'); if(!f) return;
+  if(!f.src) await launchJourney();
+  const r=f.requestFullscreen||f.webkitRequestFullscreen; if(r) r.call(f);
+}
+async function openJourneyTab(){
+  try{ const blob=await buildJourneyBlob(); window.open(blob||JOURNEY_URL,'_blank','noopener'); }
+  catch(e){ window.open(JOURNEY_URL,'_blank','noopener'); }
 }
 
 /* ---- render principale ---- */
@@ -615,8 +637,9 @@ async function renderLP(){
   const jc=document.getElementById('lpJourney');
   if(j){
     JOURNEY_URL=LP.storage.publicUrl(j.storage_prefix.replace(/\/$/,'')+'/'+j.entry_path.replace(/^\//,''));
+    window._journeyBlob=null;   // reset cache blob al cambio microsite
     const cover=j.cover_path?`<img src="${esc(LP.storage.publicUrl(j.cover_path))}" alt="">`:'';
-    jc.innerHTML=`<div class="journey-embed"><div style="position:relative"><iframe class="journey-frame" id="jFrame" title="${esc(j.title)}" allowfullscreen></iframe><div class="journey-cover" id="jCover" onclick="launchJourney()">${cover}<div class="play"><svg width="26" height="26" viewBox="0 0 24 24" fill="#EB1000"><path d="M7 5v14l12-7z"/></svg></div><div class="pl-t">${esc(j.title)}</div><div class="pl-d">Tocca per avviare l'esperienza interattiva</div></div></div><div class="journey-bar"><button onclick="fsJourney()">⤢ Fullscreen</button><a href="${esc(JOURNEY_URL)}" target="_blank" rel="noopener">↗ Apri in nuova scheda</a></div></div>`;
+    jc.innerHTML=`<div class="journey-embed"><div style="position:relative"><iframe class="journey-frame" id="jFrame" title="${esc(j.title)}" allowfullscreen></iframe><div class="journey-cover" id="jCover" onclick="launchJourney()">${cover}<div class="play"><svg width="26" height="26" viewBox="0 0 24 24" fill="#EB1000"><path d="M7 5v14l12-7z"/></svg></div><div class="pl-t">${esc(j.title)}</div><div class="pl-d">Tocca per avviare l'esperienza interattiva</div></div></div><div class="journey-bar"><button onclick="fsJourney()">⤢ Fullscreen</button><button onclick="openJourneyTab()">↗ Apri in nuova scheda</button></div></div>`;
   } else { jc.innerHTML=''; }
 
   // foto

@@ -32,6 +32,7 @@ un nuovo evento = una riga nel DB + contenuti caricati dalla console, **zero cod
    - `sql/01_*.sql`, `sql/02_admin_moderation.sql` (schema base — già presenti sul progetto)
    - `sql/03_events_content.sql` (schema multi-evento + contenuti + seed evento `adobe-eu-2026`)
    - `sql/04_auth_storage.sql` (Auth, `moderators`, RLS, bucket Storage, moderazione)
+   - `sql/05_fixes.sql` (policy insert survey per utenti autenticati — vedi [report di debug](docs/DEBUG-REPORT.md))
 2. **Account moderatore** — il login è **Email + Password** (nessuna email inviata,
    indipendente dai filtri corporate). In **Authentication → Users → Add user**:
    - Email (es. `agargiulo@adobe.com`), una password, **Auto Confirm User = ON**.
@@ -95,3 +96,16 @@ python3 -m http.server 8799
 # poi http://localhost:8799/recap.html  /  /admin.html
 ```
 Il login email+password funziona anche in locale senza configurazioni aggiuntive.
+
+## Note tecniche
+
+- **Microsite HTML su Storage**: Supabase serve i file `.html` come `text/plain` (sicurezza).
+  Il recap quindi non punta l'iframe all'URL Storage: scarica l'HTML, inietta `<base href>`
+  verso lo Storage e lo carica come **Blob `text/html`** (gli asset — css/js/svg/img/mp4 —
+  sono serviti col MIME corretto). Stessa tecnica per l'anteprima nella console.
+- **MIME upload**: i file caricati ricevono il `content-type` dedotto dall'estensione
+  (`LP.storage.mime`), necessario perché i blob da JSZip non hanno `type`.
+- **Cleanup Storage**: eliminando materiali/foto/microsite vengono rimossi anche i file su
+  Storage (`LP.storage.pathFromUrl` / `removePrefix`), niente file orfani.
+- **Auth**: login email+password; la tabella `moderators` autorizza le scritture via
+  `is_moderator()` + RLS. Vedi il [report di debug end-to-end](docs/DEBUG-REPORT.md).
