@@ -368,6 +368,46 @@
     .lp-hero h1{font-size:27px}
     .cap-bar .cn{width:150px}
   }
+
+  /* ===== sezioni gestite (auto-hide / visibilità / ordine) ===== */
+  .lp-sec[hidden]{display:none}
+  .mat-card{cursor:pointer;border:none;width:100%;font-family:inherit}
+  .mat-card .mtype{display:inline-block;font-size:10px;font-weight:800;color:var(--ink-faint);
+    letter-spacing:.04em;text-transform:uppercase;margin-top:2px}
+
+  /* ===== Journey microsite (viewer integrato) ===== */
+  .journey-embed{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+    background:#0A0A0A;box-shadow:var(--shadow)}
+  .journey-frame{width:100%;aspect-ratio:16/9;display:block;border:0;background:#0A0A0A}
+  .journey-cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:16px;background:var(--grad);color:#fff;cursor:pointer;text-align:center;padding:24px}
+  .journey-cover::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 16%,rgba(255,255,255,.2),transparent 46%)}
+  .journey-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+  .journey-cover .play{position:relative;z-index:2;width:74px;height:74px;border-radius:99px;background:#fff;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .journey-cover .play svg{margin-left:4px}
+  .journey-cover .pl-t{position:relative;z-index:2;font-size:18px;font-weight:900;letter-spacing:-.01em}
+  .journey-cover .pl-d{position:relative;z-index:2;font-size:13px;font-weight:600;opacity:.92;max-width:360px}
+  .journey-bar{display:flex;gap:8px;justify-content:flex-end;padding:10px;background:#0A0A0A}
+  .journey-bar button,.journey-bar a{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);
+    color:#fff;border:1px solid rgba(255,255,255,.16);padding:8px 14px;border-radius:99px;font-size:12.5px;
+    font-weight:800;font-family:inherit;cursor:pointer;text-decoration:none;transition:.15s}
+  .journey-bar button:hover,.journey-bar a:hover{background:rgba(255,255,255,.2)}
+
+  /* ===== Lightbox (preview documenti/video) ===== */
+  .lb{position:fixed;inset:0;background:rgba(10,10,12,.86);z-index:1000;display:none;
+    align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+  .lb.on{display:flex;animation:lbin .2s ease}
+  @keyframes lbin{from{opacity:0}to{opacity:1}}
+  .lb-box{width:min(94vw,1080px);height:min(90vh,760px);background:#111;border-radius:16px;overflow:hidden;
+    display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+  .lb-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;
+    background:#161619;color:#fff;flex:none}
+  .lb-head .lb-t{font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-head .lb-x{width:34px;height:34px;border-radius:99px;background:rgba(255,255,255,.1);color:#fff;
+    font-size:18px;display:flex;align-items:center;justify-content:center;flex:none}
+  .lb-body{flex:1;background:#000;display:flex;align-items:center;justify-content:center;min-height:0}
+  .lb-body iframe,.lb-body video{width:100%;height:100%;border:0;background:#000}
 </style>
 </head>
 <body class="prod-recap">
@@ -376,66 +416,72 @@
   <div class="lp-hero">
     <svg class="lpfly spin" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><circle cx="50" cy="50" r="32"/><circle cx="50" cy="50" r="18"/></svg>
     <div class="logo">Adobe</div>
-    <div class="badge">⚡ EVENT RECAP · 18 GIUGNO 2026</div>
-    <h1>Orchestrare la Customer Experience nel settore Energy &amp; Utilities</h1>
-    <p>Una mattinata tra dati, contenuti e AI. Ecco cosa è emerso dalla voce di chi era in sala.</p>
+    <div class="badge" id="lpBadge">⚡ EVENT RECAP · 18 GIUGNO 2026</div>
+    <h1 id="lpTitle">Orchestrare la Customer Experience nel settore Energy &amp; Utilities</h1>
+    <p id="lpLead">Una mattinata tra dati, contenuti e AI. Ecco cosa è emerso dalla voce di chi era in sala.</p>
   </div>
   <div class="lp-wrap">
     <div class="lp-stats">
       <div class="lp-stat"><div class="n" id="lpTotal">0</div><div class="l">PARTECIPANTI ATTIVI</div></div>
       <div class="lp-stat"><div class="n" id="lpMat">0.0</div><div class="l">MATURITÀ CX MEDIA</div></div>
-      <div class="lp-stat"><div class="n">5</div><div class="l">SPEAKER</div></div>
-      <div class="lp-stat"><div class="n">7</div><div class="l">FASI DEL FLYWHEEL</div></div>
+      <div class="lp-stat"><div class="n" id="lpSpeakers">5</div><div class="l">SPEAKER</div></div>
+      <div class="lp-stat"><div class="n" id="lpPhases">7</div><div class="l">FASI DEL FLYWHEEL</div></div>
     </div>
-    <div class="lp-sec">
-      <h2>Le fasi che vi hanno colpito di più</h2>
+    <div class="lp-sec" data-section="topics">
+      <h2 data-title>Le fasi che vi hanno colpito di più</h2>
       <p class="lead">Abbiamo chiesto alla sala quale fase del volano contasse di più per le proprie priorità.</p>
       <div class="topic-grid" id="lpTopics"></div>
     </div>
-    <div class="lp-sec">
-      <h2>I temi più richiesti</h2>
+    <div class="lp-sec" data-section="caps">
+      <h2 data-title>I temi più richiesti</h2>
       <p class="lead">Dove la sala vuole approfondire per prima — mappato sulle capability Adobe.</p>
       <div class="cap-list" id="lpCaps"></div>
     </div>
-    <div class="lp-sec">
-      <h2>Gli interventi più apprezzati</h2>
+    <div class="lp-sec" data-section="ratings">
+      <h2 data-title>Gli interventi più apprezzati</h2>
       <p class="lead">Il voto medio della sala su ogni intervento della giornata.</p>
       <div class="cap-list" id="lpRates"></div>
     </div>
-    <div class="lp-sec">
-      <h2>Le vostre parole</h2>
+    <div class="lp-sec" data-section="quotes">
+      <h2 data-title>Le vostre parole</h2>
       <p class="lead">Una selezione dei pensieri condivisi dai partecipanti che hanno autorizzato la pubblicazione.</p>
       <div class="quote-wall" id="lpQuotes"></div>
     </div>
-    <div class="lp-sec">
-      <h2>Materiali della giornata</h2>
+    <div class="lp-sec" data-section="materials">
+      <h2 data-title>Materiali della giornata</h2>
       <p class="lead">Tutto ciò che vi serve per portare l'orchestrazione della CX nella vostra azienda.</p>
-      <div class="mat-grid">
-        <a class="mat-card"><div class="mi">📊</div><div><div class="mt">Slide keynote</div><div class="md">PDF · L'Infrastruttura dell'Attenzione</div></div></a>
-        <a class="mat-card"><div class="mi">🎥</div><div><div class="mt">Demo end-to-end</div><div class="md">Video · Dall'ideazione alla campagna</div></div></a>
-        <a class="mat-card"><div class="mi">📄</div><div><div class="mt">One-pager soluzioni</div><div class="md">PDF · Adobe Customer Solutions</div></div></a>
-        <a class="mat-card"><div class="mi">📈</div><div><div class="mt">Report CX E&amp;U 2026</div><div class="md">PDF · Benchmark di settore</div></div></a>
-        <a class="mat-card"><div class="mi">🔗</div><div><div class="mt">Real-Time CDP</div><div class="md">Link · Approfondimento prodotto</div></div></a>
-        <a class="mat-card"><div class="mi">📅</div><div><div class="mt">Prenota un follow-up</div><div class="md">Parla con il team Adobe Italia</div></div></a>
-      </div>
+      <div class="mat-grid" id="lpMats"></div>
     </div>
-    <div class="lp-sec">
-      <h2>Momenti della giornata</h2>
-      <p class="lead">Adobe Italia, Milano · 18 giugno 2026.</p>
-      <div class="photo-strip">
-        <div class="photo"><span>Il benvenuto in sala</span></div>
-        <div class="photo"><span>La keynote</span></div>
-        <div class="photo"><span>Networking &amp; demo</span></div>
-      </div>
+
+    <div class="lp-sec" data-section="journey">
+      <h2 data-title>Rivivi la journey</h2>
+      <p class="lead">L'esperienza interattiva della giornata, da sfogliare quando vuoi.</p>
+      <div id="lpJourney"></div>
+    </div>
+    <div class="lp-sec" data-section="photos">
+      <h2 data-title>Momenti della giornata</h2>
+      <p class="lead" id="lpPhotosLead">Adobe Italia, Milano · 18 giugno 2026.</p>
+      <div class="photo-strip" id="lpPhotos"></div>
     </div>
   </div>
   <div class="lp-foot">
     <div class="logo">Adobe</div>
-    <p>Grazie per aver orchestrato questa giornata con noi. Per qualsiasi necessità: Michela Cimmino · mcimmino@adobe.com</p>
+    <p id="lpFootContact">Grazie per aver orchestrato questa giornata con noi. Per qualsiasi necessità: Michela Cimmino · mcimmino@adobe.com</p>
     <a class="fbtn" onclick="fu()">Prenota un follow-up →</a>
   </div>
 </div>
 
+
+<!-- LIGHTBOX preview (documenti / video) -->
+<div class="lb" id="lb" onclick="if(event.target===this)closeLb()">
+  <div class="lb-box">
+    <div class="lb-head">
+      <span class="lb-t" id="lbTitle"></span>
+      <button class="lb-x" onclick="closeLb()" aria-label="Chiudi">&times;</button>
+    </div>
+    <div class="lb-body" id="lbBody"></div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -456,36 +502,153 @@ const CAPS=[["LLM Optimizer","Farsi trovare dall'AI","LLM Optimizer"],["Planning
 
 const TD={"Planning & Workflow":"Dall'intento di campagna al piano orchestrato.","Creation & Production":"Contenuti on-brand su scala, il «100x».","Asset Management":"Governare, riusare, localizzare e attivare gli asset.","Audience & Journey":"Profilo cliente unico e journey orchestrati.","Delivery & Insights":"Attivazione omnicanale e misurazione continua."};
 
+function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+/* ---- helpers materiali / preview ---- */
+const MAT_ICON={pdf:'📄',doc:'📝',image:'🖼️',video:'🎥',link:'🔗'};
+const MAT_LABEL={pdf:'PDF',doc:'Documento',image:'Immagine',video:'Video',link:'Link'};
+let MATS={};            // id -> material
+let JOURNEY_URL='';     // url entry microsite (per launch/fullscreen/nuova scheda)
+
+function ytEmbed(u){const m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);return m?'https://www.youtube.com/embed/'+m[1]+'?autoplay=1':null;}
+function vimeoEmbed(u){const m=u.match(/vimeo\.com\/(?:video\/)?(\d+)/);return m?'https://player.vimeo.com/video/'+m[1]+'?autoplay=1':null;}
+
+function openLb(title,inner){
+  document.getElementById('lbTitle').textContent=title||'';
+  document.getElementById('lbBody').innerHTML=inner;
+  document.getElementById('lb').classList.add('on');
+}
+function closeLb(){
+  document.getElementById('lb').classList.remove('on');
+  document.getElementById('lbBody').innerHTML='';   // ferma video/iframe
+}
+
+function openMaterial(id){
+  const m=MATS[id]; if(!m) return;
+  LP.materials.click(id);
+  const url=m.url;
+  if(m.type==='pdf'){ openLb(m.title,`<iframe src="${esc(url)}#toolbar=1" title="${esc(m.title)}"></iframe>`); return; }
+  if(m.type==='image'){ openLb(m.title,`<img src="${esc(url)}" alt="${esc(m.title)}" style="max-width:100%;max-height:100%;object-fit:contain">`); return; }
+  if(m.type==='video'){
+    const emb=ytEmbed(url)||vimeoEmbed(url);
+    if(emb){ openLb(m.title,`<iframe src="${esc(emb)}" allow="autoplay; fullscreen" allowfullscreen></iframe>`); }
+    else { openLb(m.title,`<video src="${esc(url)}" controls autoplay></video>`); }
+    return;
+  }
+  // doc / link -> nuova scheda
+  window.open(url,'_blank','noopener');
+}
+
+/* ---- journey microsite ---- */
+function launchJourney(){
+  const f=document.getElementById('jFrame'); if(!f||!JOURNEY_URL) return;
+  f.src=JOURNEY_URL;
+  const c=document.getElementById('jCover'); if(c) c.style.display='none';
+}
+function fsJourney(){
+  const el=document.getElementById('jFrame');
+  if(!el) return;
+  if(!el.src) launchJourney();
+  const r=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(r) r.call(el);
+}
+
+/* ---- render principale ---- */
+function show(sec,on){const el=document.querySelector('.lp-sec[data-section="'+sec+'"]');if(el)el.hidden=!on;}
+
 async function renderLP(){
+  const ev=await getEvent();
+  const eid=ev?ev.id:null;
+  const cfg=(ev&&ev.config)||{};
+
+  // --- branding / hero / stats ---
+  if(ev){
+    const t=document.getElementById('lpTitle'); if(t&&ev.name)t.textContent=ev.name;
+    const l=document.getElementById('lpLead'); if(l&&ev.subtitle)l.textContent=ev.subtitle;
+    const b=document.getElementById('lpBadge'); if(b&&cfg.badge)b.textContent=cfg.badge;
+    if(cfg.accent)document.documentElement.style.setProperty('--adobe-red',cfg.accent);
+    if(cfg.stats_speakers!=null)document.getElementById('lpSpeakers').textContent=cfg.stats_speakers;
+    if(cfg.stats_phases!=null)document.getElementById('lpPhases').textContent=cfg.stats_phases;
+    const fc=document.getElementById('lpFootContact');
+    if(fc&&cfg.footer_contact)fc.textContent='Grazie per aver orchestrato questa giornata con noi. Per qualsiasi necessità: '+cfg.footer_contact;
+  }
+
+  // --- dati ---
   const d=await Store.read();
   document.getElementById('lpTotal').textContent=d.length||'—';
   document.getElementById('lpMat').textContent=avgMat(d);
-  const c=TOPICS.map(([lab,val])=>({lab,val,n:d.filter(e=>e.q1===val).length})).sort((a,b)=>b.n-a.n);
+
   const tot=d.length||1;
+  const c=TOPICS.map(([lab,val])=>({lab,val,n:d.filter(e=>e.q1===val).length})).sort((a,b)=>b.n-a.n);
   document.getElementById('lpTopics').innerHTML=c.map((x,i)=>`<div class="topic-card"><div class="num">#${i+1} · ${Math.round(x.n/tot*100)}%</div><h4>${x.lab}</h4><p>${TD[x.val]||''}</p><div class="pct"><div class="pb"><div class="pf" style="width:${x.n/tot*100}%"></div></div><b>${x.n}</b></div></div>`).join('');
+
   const cap=CAPS.map(([lab,benefit,prod])=>({lab:benefit,prod,key:lab,n:d.filter(e=>(e.q3||[]).includes(lab)).length})).sort((a,b)=>b.n-a.n);
+  const capTot=cap.reduce((s,x)=>s+x.n,0);
   const cmax=Math.max(1,...cap.map(x=>x.n));
   document.getElementById('lpCaps').innerHTML=cap.map(x=>`<div class="cap-bar"><div class="cn">${x.lab}<small>${x.prod}</small></div><div class="ct"><div class="cf" style="width:${x.n/cmax*100}%"></div></div><div class="cv">${x.n}</div></div>`).join('');
+
   const rt=TALKS.map(([k,lab,sub])=>({lab,sub,avg:avgRating(d,k),n:countRating(d,k)})).sort((a,b)=>b.avg-a.avg);
+  const rateTot=rt.reduce((s,x)=>s+x.n,0);
   const lpr=document.getElementById('lpRates');
-  if(lpr){lpr.innerHTML=rt.map(r=>`<div class="cap-bar"><div class="cn">${r.lab}<small style="color:var(--ink-faint)">${r.sub}</small></div><div class="ct"><div class="cf" style="width:${r.avg/5*100}%;background:linear-gradient(135deg,#F5A623,#F7C254)"></div></div><div class="cv">${r.avg?r.avg.toFixed(1)+'★':'—'}</div></div>`).join('');}
+  if(lpr)lpr.innerHTML=rt.map(r=>`<div class="cap-bar"><div class="cn">${r.lab}<small style="color:var(--ink-faint)">${r.sub}</small></div><div class="ct"><div class="cf" style="width:${r.avg/5*100}%;background:linear-gradient(135deg,#F5A623,#F7C254)"></div></div><div class="cv">${r.avg?r.avg.toFixed(1)+'★':'—'}</div></div>`).join('');
 
   const qs=d.filter(e=>e.quote&&e.social&&e.approved);
-  const w=document.getElementById('lpQuotes');
-  if(!qs.length)w.innerHTML='<div class="wall-q"><div class="qt">"Le quote autorizzate dai partecipanti compariranno qui dopo l\'evento."</div><div class="qa">— In attesa</div></div>';
-  else w.innerHTML=qs.map(e=>{let a='Partecipante';if(e.name&&e.company)a=e.name+', '+e.company;else if(e.name)a=e.name;else if(e.company)a=e.company;return `<div class="wall-q"><div class="qt">"${esc(e.quote)}"</div><div class="qa">— ${esc(a)}</div></div>`}).join('');
+  document.getElementById('lpQuotes').innerHTML=qs.map(e=>{let a='Partecipante';if(e.name&&e.company)a=e.name+', '+e.company;else if(e.name)a=e.name;else if(e.company)a=e.company;return `<div class="wall-q"><div class="qt">"${esc(e.quote)}"</div><div class="qa">— ${esc(a)}</div></div>`}).join('');
+
+  // --- contenuti gestiti (materiali / journey / foto / sezioni) ---
+  let mats=[],photos=[],micros=[],sections=[];
+  if(eid){
+    [mats,photos,micros,sections]=await Promise.all([
+      LP.materials.list(eid,{publishedOnly:true}),
+      LP.photos.list(eid,{publishedOnly:true}),
+      LP.microsites.list(eid,{publishedOnly:true}),
+      LP.sections.list(eid)
+    ]);
+  }
+
+  // materiali
+  MATS={}; mats.forEach(m=>MATS[m.id]=m);
+  document.getElementById('lpMats').innerHTML=mats.map(m=>`<button class="mat-card" onclick="openMaterial('${m.id}')"><div class="mi">${esc(m.icon||MAT_ICON[m.type]||'📎')}</div><div><div class="mt">${esc(m.title)}</div><div class="md">${esc(m.description||'')}</div><span class="mtype">${MAT_LABEL[m.type]||''}</span></div></button>`).join('');
+
+  // journey microsite
+  const j=micros[0];
+  const jc=document.getElementById('lpJourney');
+  if(j){
+    JOURNEY_URL=LP.storage.publicUrl(j.storage_prefix.replace(/\/$/,'')+'/'+j.entry_path.replace(/^\//,''));
+    const cover=j.cover_path?`<img src="${esc(LP.storage.publicUrl(j.cover_path))}" alt="">`:'';
+    jc.innerHTML=`<div class="journey-embed"><div style="position:relative"><iframe class="journey-frame" id="jFrame" title="${esc(j.title)}" allowfullscreen></iframe><div class="journey-cover" id="jCover" onclick="launchJourney()">${cover}<div class="play"><svg width="26" height="26" viewBox="0 0 24 24" fill="#EB1000"><path d="M7 5v14l12-7z"/></svg></div><div class="pl-t">${esc(j.title)}</div><div class="pl-d">Tocca per avviare l'esperienza interattiva</div></div></div><div class="journey-bar"><button onclick="fsJourney()">⤢ Fullscreen</button><a href="${esc(JOURNEY_URL)}" target="_blank" rel="noopener">↗ Apri in nuova scheda</a></div></div>`;
+  } else { jc.innerHTML=''; }
+
+  // foto
+  document.getElementById('lpPhotos').innerHTML=photos.map(p=>{const u=esc(LP.storage.publicUrl(p.storage_path));return `<div class="photo" style="background-image:url('${u}');background-size:cover;background-position:center">${p.caption?`<span>${esc(p.caption)}</span>`:''}</div>`;}).join('');
+
+  // --- visibilità + ordine + auto-hide delle sezioni ---
+  const counts={topics:d.length,caps:capTot,ratings:rateTot,quotes:qs.length,materials:mats.length,journey:j?1:0,photos:photos.length};
+  if(sections.length){
+    const wrap=document.querySelector('.lp-wrap');
+    sections.forEach(s=>{
+      const el=document.querySelector('.lp-sec[data-section="'+s.key+'"]');
+      if(!el) return;
+      if(s.title){const h=el.querySelector('[data-title]');if(h)h.textContent=s.title;}
+      const cnt=counts[s.key];
+      const empty=(cnt!=null&&cnt===0);
+      el.hidden = !s.visible || (s.auto_hide && empty);
+      if(wrap && el.parentElement===wrap) wrap.appendChild(el);   // riordina
+    });
+  } else {
+    // fallback senza schema sezioni: auto-hide minimale
+    Object.keys(counts).forEach(k=>show(k,counts[k]>0));
+  }
 }
-
-/* SEED */
-
-function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
 function fu(){if(window.sendPrompt)window.sendPrompt("Vorrei prenotare un follow-up con il team Adobe Italia dopo l'evento Energy & Utilities.")}
 
-
 // --- init recap ---
+let _rt=null;
+function scheduleRender(){clearTimeout(_rt);_rt=setTimeout(renderLP,250);}
 renderLP();
-subscribe(()=>renderLP());   // realtime: si aggiorna se moderi/arrivano risposte
+['responses','materials','recap_sections','microsites','event_photos','events']
+  .forEach(t=>subscribe(scheduleRender,t));   // realtime: aggiornamento live
 
 </script>
 </body>

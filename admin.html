@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adobe E&U · Moderazione testimonianze</title>
+<title>Live Pulse · Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
@@ -16,54 +16,93 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:var(--font);background:var(--bg-soft);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
-  /* ---- gate ---- */
-  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:50}
-  .gate-card{width:min(92vw,380px);text-align:center}
+  a{color:var(--adobe-red)}
+  /* gate */
+  #gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .gate-card{width:min(92vw,400px);text-align:center}
   .gate-card .logo{color:var(--adobe-red);font-weight:900;font-size:30px;letter-spacing:-.02em}
   .gate-card h1{font-size:20px;font-weight:800;margin:18px 0 6px}
   .gate-card p{color:var(--ink-faint);font-size:14px;margin-bottom:22px}
   .gate-card input{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;outline:none}
   .gate-card input:focus{border-color:var(--adobe-red)}
-  .gate-card input.err{border-color:var(--adobe-red);background:var(--bg-tint)}
   .gate-card button{width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;background:var(--adobe-red);color:#fff;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer}
-  /* ---- header ---- */
-  header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .gate-msg{margin-top:16px;font-size:13.5px;line-height:1.5;border-radius:10px;padding:12px 14px;display:none}
+  .gate-msg.ok{display:block;background:var(--ok-soft);color:var(--ok)}
+  .gate-msg.err{display:block;background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA}
+  /* header */
+  header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   header .ttl{display:flex;align-items:center;gap:12px}
   header .logo{color:var(--adobe-red);font-weight:900;font-size:22px;letter-spacing:-.02em}
   header .ttl b{font-size:15px;font-weight:800}
   header .ttl span{display:block;font-size:12px;color:var(--ink-faint)}
+  .hdr-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  select,.inp{padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink);outline:none}
+  select:focus,.inp:focus{border-color:var(--adobe-red)}
+  .who{font-size:12.5px;color:var(--ink-faint)}
+  /* tabs */
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 0;max-width:1100px;margin:0 auto;flex-wrap:wrap}
+  .tabs button{padding:9px 16px;border:1.5px solid var(--line);background:#fff;border-radius:99px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink-soft);white-space:nowrap}
+  .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tabs button .n{opacity:.6;font-weight:700}
+  main{max-width:1100px;margin:0 auto;padding:18px 16px 90px}
+  .panel{display:none}
+  .panel.on{display:block;animation:fade .25s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  /* cards / forms */
+  .box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .box h3{font-size:15px;font-weight:800;margin-bottom:4px}
+  .box .sub{font-size:13px;color:var(--ink-faint);margin-bottom:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px}
+  .field input,.field textarea,.field select{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+  .field input:focus,.field textarea:focus{border-color:var(--adobe-red)}
+  .field textarea{min-height:64px;resize:vertical}
+  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .btn{padding:10px 16px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink);transition:.15s}
+  .btn:hover{border-color:#c9c9cd}
+  .btn.pri{background:var(--adobe-red);border-color:var(--adobe-red);color:#fff}
+  .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.ghost{background:none;border-color:transparent;color:var(--ink-faint)}
+  .btn.sm{padding:7px 11px;font-size:12.5px}
+  .btn.danger:hover{background:#7a1010;border-color:#a11;color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  /* item rows */
+  .item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff}
+  .item .ico{width:40px;height:40px;border-radius:10px;background:var(--bg-tint);display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+  .item .it-main{flex:1;min-width:0}
+  .item .it-t{font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis}
+  .item .it-d{font-size:12px;color:var(--ink-faint);overflow:hidden;text-overflow:ellipsis}
+  .item .it-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:none}
+  .tag{font-size:11px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:99px;text-transform:uppercase}
+  .tag.pub{background:var(--ok);color:#fff}.tag.draft{background:var(--warn-soft);color:var(--warn)}
+  /* toggle */
+  .sw{width:42px;height:25px;border-radius:99px;background:#CFCFD2;position:relative;transition:.2s;cursor:pointer;flex:none;border:none}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:99px;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .sw.on{background:var(--ok)}.sw.on::after{transform:translateX(17px)}
+  .swrap{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+  /* upload */
+  .drop{border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--ink-faint);font-size:13.5px;cursor:pointer;background:var(--bg-soft)}
+  .drop:hover{border-color:var(--adobe-red);color:var(--ink-soft)}
+  .prog{height:8px;background:var(--bg-soft);border-radius:99px;overflow:hidden;margin-top:10px;display:none}
+  .prog.on{display:block}.prog i{display:block;height:100%;background:var(--adobe-red);width:0;transition:width .2s}
+  .hintbar{background:var(--bg-tint);border:1px solid #FAD9D2;border-radius:12px;padding:12px 14px;font-size:13px;color:var(--ink-soft);margin-bottom:16px}
+  .hintbar b{color:var(--adobe-red)}
+  .empty{text-align:center;color:var(--ink-faint);padding:30px 20px;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.03em}
+  /* moderation card */
+  .mcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .mcard.is-hidden{opacity:.5}
+  .mcard .q{font-size:16px;line-height:1.4;font-style:italic}
+  .mcard .meta{margin-top:8px;font-size:12.5px;color:var(--ink-faint);display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center}
+  .tag.social{background:var(--ok-soft);color:var(--ok)}.tag.nosocial{background:#F0F0F2;color:#86888E}
+  .tag.appr{background:var(--ok);color:#fff}.tag.wait{background:var(--warn-soft);color:var(--warn)}
   .live-dot{display:inline-flex;align-items:center;gap:7px;background:var(--ok-soft);color:var(--ok);font-size:13px;font-weight:700;padding:6px 12px;border-radius:99px}
   .live-dot i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .filters{display:flex;gap:8px;flex-wrap:wrap}
-  .filters button{padding:7px 14px;border:1.5px solid var(--line);background:#fff;border-radius:99px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--ink-soft)}
-  .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .filters .n{opacity:.6;font-weight:600}
-  /* ---- list ---- */
-  main{max-width:880px;margin:0 auto;padding:20px 16px 80px}
-  .empty{text-align:center;color:var(--ink-faint);padding:60px 20px;font-size:15px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);transition:opacity .2s}
-  .card.is-hidden{opacity:.5}
-  .card .q{font-size:18px;line-height:1.45;font-style:italic;color:var(--ink)}
-  .card .meta{margin-top:10px;font-size:13px;color:var(--ink-faint);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
-  .card .meta b{color:var(--ink-soft);font-weight:700;font-style:normal}
-  .tag{font-size:11px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:99px;text-transform:uppercase}
-  .tag.social{background:var(--ok-soft);color:var(--ok)}
-  .tag.nosocial{background:#F0F0F2;color:#86888E}
-  .tag.appr{background:var(--ok);color:#fff}
-  .tag.wait{background:var(--warn-soft);color:var(--warn)}
-  .card .acts{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
-  .btn{padding:11px 18px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink);transition:.15s}
-  .btn:hover{border-color:#c9c9cd}
-  .btn.approve{background:var(--ok);border-color:var(--ok);color:#fff}
-  .btn.wipe{background:#2a2a2e;border:1px solid #444;color:#bbb;font-size:13px;padding:8px 12px}
-  .btn.wipe:hover{background:#7a1010;border-color:#a11;color:#fff}
-  .btn.approve.is{background:#fff;color:var(--ok);border-color:var(--ok)}
-  .btn.hide{margin-left:auto;color:var(--ink-faint)}
-  .btn.hide.is{color:var(--adobe-red);border-color:var(--adobe-red)}
-  .note{font-size:13px;color:var(--ink-faint);margin-top:8px;padding-left:12px;border-left:3px solid var(--line)}
-  .hintbar{background:var(--bg-tint);border:1px solid #FAD9D2;border-radius:12px;padding:12px 14px;font-size:13px;color:var(--ink-soft);margin-bottom:18px}
-  .hintbar b{color:var(--adobe-red)}
 </style>
 </head>
 <body>
@@ -72,10 +111,11 @@
 <div id="gate">
   <div class="gate-card">
     <div class="logo">Adobe</div>
-    <h1>Moderazione testimonianze</h1>
-    <p>Energy &amp; Utilities · accesso riservato</p>
-    <input id="pwd" type="password" placeholder="Password moderatore" autocomplete="off">
-    <button onclick="unlock()">Entra</button>
+    <h1>Live Pulse · Console</h1>
+    <p>Accesso riservato ai moderatori · login via magic-link</p>
+    <input id="email" type="email" placeholder="La tua email" autocomplete="email">
+    <button id="loginBtn" onclick="doLogin()">Invia link di accesso</button>
+    <div class="gate-msg" id="gateMsg"></div>
   </div>
 </div>
 
@@ -84,150 +124,470 @@
   <header>
     <div class="ttl">
       <span class="logo">Adobe</span>
-      <div><b>Moderazione live</b><span>Energy &amp; Utilities · Milano · 18 giu 2026</span></div>
+      <div><b>Live Pulse · Console</b><span id="hdrSub">—</span></div>
     </div>
-    <div style="display:flex;align-items:center;gap:14px">
-      <span class="live-dot"><i></i> IN DIRETTA · <span id="liveN">0</span></span>
-      <div class="filters">
-        <button id="f-wait" class="on" onclick="setFilter('wait')">Da approvare <span class="n" id="cWait">0</span></button>
-        <button id="f-appr" onclick="setFilter('appr')">Approvate <span class="n" id="cAppr">0</span></button>
-        <button id="f-all" onclick="setFilter('all')">Tutte <span class="n" id="cAll">0</span></button>
-      </div>
-      <button id="wipeBtn" class="btn wipe" onclick="wipeData()" title="Cancella tutte le risposte dal database (per test)">✕ Azzera dati</button>
+    <div class="hdr-right">
+      <select id="evSel" onchange="onEventChange()"></select>
+      <button class="btn sm" onclick="newEvent()">+ Evento</button>
+      <span class="who" id="who"></span>
+      <button class="btn sm ghost" onclick="doLogout()">Esci</button>
     </div>
   </header>
+
+  <div class="tabs" id="tabs">
+    <button data-tab="evento" class="on" onclick="switchTab('evento')">Evento</button>
+    <button data-tab="sezioni" onclick="switchTab('sezioni')">Sezioni</button>
+    <button data-tab="materiali" onclick="switchTab('materiali')">Materiali <span class="n" id="cMat"></span></button>
+    <button data-tab="journey" onclick="switchTab('journey')">Journey</button>
+    <button data-tab="foto" onclick="switchTab('foto')">Foto <span class="n" id="cPhoto"></span></button>
+    <button data-tab="testimonianze" onclick="switchTab('testimonianze')">Testimonianze <span class="n" id="cQuote"></span></button>
+    <button data-tab="lead" onclick="switchTab('lead')">Lead <span class="n" id="cLead"></span></button>
+  </div>
+
   <main>
-    <div class="hintbar">
-      <b>Palco</b> = mostra le testimonianze <b>approvate</b>. &nbsp;<b>Landing pubblica</b> = solo approvate <b>con consenso social</b>. Approva qui per portarle live.
-    </div>
-    <div id="list"></div>
+    <div class="panel on" id="p-evento"></div>
+    <div class="panel" id="p-sezioni"></div>
+    <div class="panel" id="p-materiali"></div>
+    <div class="panel" id="p-journey"></div>
+    <div class="panel" id="p-foto"></div>
+    <div class="panel" id="p-testimonianze"></div>
+    <div class="panel" id="p-lead"></div>
   </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="config.js"></script>
 <script>
-let DATA=[], FILTER='wait';
+function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function el(id){return document.getElementById(id)}
+function safe(n){return (n||'file').replace(/[^\w.\-]+/g,'_')}
+function toast(m){const g=el('gateMsg');console.log(m);}
 
-async function unlock(){
-  const v=document.getElementById('pwd').value;
-  if(!v){ document.getElementById('pwd').classList.add('err'); return; }
-  // verifica la password provandola davvero contro Supabase (RPC innocua)
-  ADMIN_PWD = v;
-  const btn = document.querySelector('#gate button');
-  const prevLabel = btn.textContent; btn.textContent='Verifico\u2026'; btn.disabled=true;
-  const res = await testPwd();
-  btn.textContent=prevLabel; btn.disabled=false;
-  if(!res.ok){
-    ADMIN_PWD='';
-    const p=document.getElementById('pwd'); p.classList.add('err'); p.value='';
-    if(res.reason==='config'){
-      p.placeholder='Errore di connessione a Supabase \u2014 controlla config.js e gli SQL';
-      let w=document.getElementById('gateWarn');
-      if(!w){ w=document.createElement('div'); w.id='gateWarn';
-        w.style.cssText='margin-top:14px;font-size:13px;line-height:1.5;color:#B91C1C;text-align:left;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 14px';
-        document.querySelector('#gate .card, #gate').appendChild(w); }
-      w.textContent='Le funzioni di moderazione non rispondono. Verifica di aver eseguito 02_admin_moderation.sql su Supabase e che config.js punti al progetto giusto.';
-    } else {
-      p.placeholder='Password errata \u2014 riprova';
-    }
+let EVENTS=[], EV=null, USER=null, TAB='evento';
+
+/* ================= AUTH ================= */
+async function doLogin(){
+  const email=el('email').value.trim();
+  const msg=el('gateMsg');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.className='gate-msg err'; msg.textContent='Inserisci un indirizzo email valido.'; return; }
+  const b=el('loginBtn'); b.disabled=true; b.textContent='Invio…';
+  const { error } = await LP.auth.signIn(email);
+  b.disabled=false; b.textContent='Invia link di accesso';
+  if(error){ msg.className='gate-msg err'; msg.textContent='Errore: '+error.message; return; }
+  msg.className='gate-msg ok';
+  msg.textContent='Ti abbiamo inviato un link di accesso a '+email+'. Aprilo da questo dispositivo per entrare.';
+}
+async function doLogout(){ await LP.auth.signOut(); location.reload(); }
+
+async function checkAuth(){
+  USER = await LP.auth.user();
+  if(!USER){ el('gate').style.display='flex'; el('app').style.display='none'; return; }
+  const mod = await LP.auth.isModerator();
+  if(!mod){
+    el('gate').style.display='flex'; el('app').style.display='none';
+    const msg=el('gateMsg'); msg.className='gate-msg err';
+    msg.textContent=USER.email+' non è tra i moderatori autorizzati. Aggiungi l\'email nella tabella moderators.';
     return;
   }
-  document.getElementById('gate').style.display='none';
-  document.getElementById('app').style.display='block';
-  load(); subscribe(()=>load());
+  el('gate').style.display='none'; el('app').style.display='block';
+  el('who').textContent=USER.email;
+  boot();
 }
-// prova la password: chiama una RPC fittizia su un id inesistente.
-// password giusta -> nessun errore (0 righe aggiornate). password errata -> eccezione 'unauthorized'.
-async function testPwd(){
-  // config.js non compilato? sb inesistente o URL placeholder -> errore subito chiaro
-  if(typeof sb==='undefined' || !sb || /XXXX/.test(String(SUPABASE_URL||''))){
-    return { ok:false, reason:'config', detail:'config.js non compilato (SUPABASE_URL/ANON mancanti)' };
-  }
-  try{
-    const { error } = await sb.rpc('moderate_set_approved',
-      { p_id:'00000000-0000-0000-0000-000000000000', p_approved:false, p_pwd:ADMIN_PWD });
-    if(!error) return { ok:true };
-    const msg = (error.message||'').toLowerCase();
-    if(msg.includes('unauthorized')) return { ok:false, reason:'pwd' };
-    console.error('Errore RPC moderazione:', error);
-    return { ok:false, reason:'config', detail:error.message };
-  }catch(ex){
-    console.error('Eccezione RPC moderazione:', ex);
-    return { ok:false, reason:'config', detail:String(ex&&ex.message||ex) };
-  }
-}
-document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+LP.auth.onChange(()=>checkAuth());
 
-async function load(){
-  DATA=(await Store.read()).filter(e=>e.quote);   // solo righe con una frase
-  render();
+/* ================= BOOT ================= */
+async function boot(){
+  EVENTS = await LP.events.list();
+  if(!EVENTS.length){ el('p-evento').innerHTML='<div class="box"><div class="empty">Nessun evento. Esegui 03_events_content.sql, poi ricarica.</div></div>'; return; }
+  const slug=getEventSlug();
+  EV = EVENTS.find(e=>e.slug===slug) || EVENTS[0];
+  el('evSel').innerHTML=EVENTS.map(e=>`<option value="${e.id}" ${e.id===EV.id?'selected':''}>${esc(e.name)} (${esc(e.slug)})</option>`).join('');
+  el('hdrSub').textContent=EV.location? (esc(EV.location)) : '';
+  renderTab(TAB);
+  refreshCounts();
 }
-function setFilter(f){FILTER=f;document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('on'));document.getElementById('f-'+f).classList.add('on');render();}
-function esc(s){return(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function onEventChange(){ EV=EVENTS.find(e=>e.id===el('evSel').value); renderTab(TAB); refreshCounts(); }
 
-function render(){
-  const wait=DATA.filter(e=>!e.approved&&!e.hidden);
-  const appr=DATA.filter(e=>e.approved&&!e.hidden);
-  document.getElementById('liveN').textContent=DATA.length;
-  document.getElementById('cWait').textContent=wait.length;
-  document.getElementById('cAppr').textContent=appr.length;
-  document.getElementById('cAll').textContent=DATA.length;
-  let rows = FILTER==='wait'?wait : FILTER==='appr'?appr : DATA;
-  rows=[...rows].reverse();
-  const L=document.getElementById('list');
-  if(!rows.length){L.innerHTML='<div class="empty">Nessuna testimonianza in questa vista.</div>';return;}
-  L.innerHTML=rows.map(e=>{
-    let who='Anonimo';
-    if(e.name&&e.company)who=esc(e.name)+', '+esc(e.company);
-    else if(e.name)who=esc(e.name);else if(e.company)who=esc(e.company);
-    const social=e.social?'<span class="tag social">consenso social</span>':'<span class="tag nosocial">no social</span>';
-    const state=e.approved?'<span class="tag appr">approvata</span>':'<span class="tag wait">in attesa</span>';
-    const note=e.cap_note?`<div class="note">Nota: ${esc(e.cap_note)}</div>`:'';
-    return `<div class="card ${e.hidden?'is-hidden':''}">
-      <div class="q">\u201c${esc(e.quote)}\u201d</div>
-      <div class="meta"><b>${who}</b> ${social} ${state} ${e.email?'· \ud83d\udce9 '+esc(e.email):''}</div>
-      ${note}
-      <div class="acts">
-        <button class="btn approve ${e.approved?'is':''}" onclick="approve('${e.id}',${!e.approved})">${e.approved?'\u2713 Approvata':'Approva \u2192 palco'}</button>
-        <button class="btn hide ${e.hidden?'is':''}" onclick="hide('${e.id}',${!e.hidden})">${e.hidden?'Ripristina':'Nascondi'}</button>
+async function refreshCounts(){
+  if(!EV) return;
+  const [mats,photos,resp,leads]=await Promise.all([
+    LP.materials.list(EV.id), LP.photos.list(EV.id), readResponses(EV.id), LP.leads.list(EV.id)
+  ]);
+  el('cMat').textContent=mats.length||''; el('cPhoto').textContent=photos.length||'';
+  el('cQuote').textContent=resp.filter(r=>r.quote).length||''; el('cLead').textContent=leads.length||'';
+}
+async function readResponses(eid){
+  const { data, error } = await sb.from('responses').select('*').eq('event_id',eid).order('created_at',{ascending:true});
+  if(error){ console.error(error); return []; } return data||[];
+}
+
+/* ================= TABS ================= */
+function switchTab(t){
+  TAB=t;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  el('p-'+t).classList.add('on');
+  renderTab(t);
+}
+function renderTab(t){
+  if(!EV) return;
+  ({evento:renderEvento,sezioni:renderSezioni,materiali:renderMateriali,journey:renderJourney,foto:renderFoto,testimonianze:renderTestimonianze,lead:renderLead}[t]||(()=>{}))();
+}
+
+/* ================= EVENTO ================= */
+function renderEvento(){
+  const c=EV.config||{};
+  const pubUrl=location.origin+location.pathname.replace(/admin\.html$/,'recap.html')+'?event='+encodeURIComponent(EV.slug);
+  el('p-evento').innerHTML=`
+   <div class="box">
+     <h3>Evento & branding</h3>
+     <div class="sub">Questi dati alimentano l'hero, le statistiche e il footer del recap pubblico.</div>
+     <div class="grid2">
+       <div class="field"><label>Nome / titolo</label><input class="inp" id="e_name" value="${esc(EV.name||'')}"></div>
+       <div class="field"><label>Slug (URL)</label><input class="inp" id="e_slug" value="${esc(EV.slug||'')}"></div>
+     </div>
+     <div class="field"><label>Sottotitolo</label><textarea id="e_sub">${esc(EV.subtitle||'')}</textarea></div>
+     <div class="grid2">
+       <div class="field"><label>Data</label><input class="inp" id="e_date" type="date" value="${esc((EV.event_date||'').slice(0,10))}"></div>
+       <div class="field"><label>Luogo</label><input class="inp" id="e_loc" value="${esc(EV.location||'')}"></div>
+     </div>
+     <div class="grid2">
+       <div class="field"><label>Badge hero</label><input class="inp" id="e_badge" value="${esc(c.badge||'')}"></div>
+       <div class="field"><label>Accent color</label><input class="inp" id="e_accent" type="color" value="${esc(c.accent||'#EB1000')}" style="height:42px"></div>
+     </div>
+     <div class="grid2">
+       <div class="field"><label>KPI · Speaker</label><input class="inp" id="e_speakers" type="number" value="${c.stats_speakers!=null?c.stats_speakers:''}"></div>
+       <div class="field"><label>KPI · Fasi flywheel</label><input class="inp" id="e_phases" type="number" value="${c.stats_phases!=null?c.stats_phases:''}"></div>
+     </div>
+     <div class="field"><label>Contatto footer</label><input class="inp" id="e_contact" value="${esc(c.footer_contact||'')}"></div>
+     <div class="field"><label>Stato</label>
+       <select id="e_status"><option value="draft" ${EV.status==='draft'?'selected':''}>Bozza</option><option value="published" ${EV.status==='published'?'selected':''}>Pubblicato</option></select>
+     </div>
+     <div class="row"><button class="btn pri" onclick="saveEvento()">Salva</button>
+       <span id="e_saved" style="color:var(--ok);font-weight:700;font-size:13px"></span></div>
+   </div>
+   <div class="box">
+     <h3>Pubblicazione</h3>
+     <div class="sub">Link pubblico del recap per QR e condivisione.</div>
+     <div class="field"><label>URL recap</label><input class="inp" id="e_url" value="${esc(pubUrl)}" readonly></div>
+     <div class="row">
+       <button class="btn" onclick="navigator.clipboard.writeText(el('e_url').value);el('e_saved2').textContent='Copiato!'">Copia link</button>
+       <a class="btn" href="${esc(pubUrl)}" target="_blank" rel="noopener">Apri recap</a>
+       <a class="btn" href="make_qr.html" target="_blank" rel="noopener">Genera QR</a>
+       <span id="e_saved2" style="color:var(--ok);font-weight:700;font-size:13px"></span>
+     </div>
+   </div>
+   <div class="box">
+     <h3>Multi-evento</h3>
+     <div class="sub">Duplica questo evento (branding + sezioni) per partire velocemente con uno nuovo.</div>
+     <button class="btn" onclick="dupEvent()">Duplica questo evento</button>
+   </div>`;
+}
+async function saveEvento(){
+  const cfg=Object.assign({},EV.config||{},{
+    badge:el('e_badge').value, accent:el('e_accent').value,
+    stats_speakers: el('e_speakers').value!==''?Number(el('e_speakers').value):null,
+    stats_phases: el('e_phases').value!==''?Number(el('e_phases').value):null,
+    footer_contact: el('e_contact').value
+  });
+  const patch={ name:el('e_name').value.trim(), slug:el('e_slug').value.trim(), subtitle:el('e_sub').value,
+    event_date:el('e_date').value||null, location:el('e_loc').value, status:el('e_status').value, config:cfg };
+  try{ await LP.events.save(EV.id,patch); Object.assign(EV,patch); el('e_saved').textContent='Salvato ✓';
+    EVENTS=await LP.events.list(); }
+  catch(e){ alert('Errore salvataggio: '+e.message); }
+}
+async function dupEvent(){
+  const slug=prompt('Slug del nuovo evento (es. adobe-fsi-2026):'); if(!slug) return;
+  const name=prompt('Nome del nuovo evento:')||('Copia di '+EV.name);
+  try{ const created=await LP.events.duplicate(EV.id,slug.trim(),name); EVENTS=await LP.events.list(); EV=created;
+    el('evSel').innerHTML=EVENTS.map(e=>`<option value="${e.id}" ${e.id===EV.id?'selected':''}>${esc(e.name)} (${esc(e.slug)})</option>`).join('');
+    renderTab(TAB); alert('Evento duplicato come bozza.'); }
+  catch(e){ alert('Errore: '+e.message); }
+}
+async function newEvent(){
+  const slug=prompt('Slug del nuovo evento:'); if(!slug) return;
+  const name=prompt('Nome del nuovo evento:')||slug;
+  try{ const created=await LP.events.create({slug:slug.trim(),name,status:'draft',config:{accent:'#EB1000'}});
+    // sezioni default
+    const keys=[['hero',null,false,10],['stats',null,false,20],['topics','Le fasi che vi hanno colpito di più',true,30],['caps','I temi più richiesti',true,40],['ratings','Gli interventi più apprezzati',true,50],['quotes','Le vostre parole',true,60],['materials','Materiali della giornata',true,70],['journey','Rivivi la journey',true,80],['photos','Momenti della giornata',true,90]];
+    await sb.from('recap_sections').insert(keys.map(([k,t,ah,o])=>({event_id:created.id,key:k,title:t,visible:true,auto_hide:ah,sort_order:o})));
+    EVENTS=await LP.events.list(); EV=created; boot(); alert('Evento creato.'); }
+  catch(e){ alert('Errore: '+e.message); }
+}
+
+/* ================= SEZIONI ================= */
+async function renderSezioni(){
+  const secs=await LP.sections.list(EV.id);
+  el('p-sezioni').innerHTML=`<div class="hintbar"><b>Auto-hide</b>: se attivo, la sezione sparisce dal recap quando non ha contenuti (es. nessuna citazione approvata).</div>`+
+    `<div class="box"><h3>Sezioni del recap</h3><div class="sub">Visibilità, titolo, auto-hide e ordine.</div><div id="secList"></div></div>`;
+  const L=el('secList');
+  L.innerHTML=secs.map((s,i)=>`<div class="item">
+      <div class="it-main">
+        <input class="inp" style="width:100%;margin-bottom:6px" value="${esc(s.title||'')}" placeholder="(${esc(s.key)})" onchange="secSave('${s.id}',{title:this.value})">
+        <div class="it-d">key: ${esc(s.key)}</div>
       </div>
-    </div>`;
+      <div class="it-acts">
+        <span class="swrap">Visibile<button class="sw ${s.visible?'on':''}" onclick="secToggle('${s.id}','visible',this)"></button></span>
+        <span class="swrap">Auto-hide<button class="sw ${s.auto_hide?'on':''}" onclick="secToggle('${s.id}','auto_hide',this)"></button></span>
+        <button class="btn sm" onclick="secMove('${s.id}',-1)" ${i===0?'disabled':''}>↑</button>
+        <button class="btn sm" onclick="secMove('${s.id}',1)" ${i===secs.length-1?'disabled':''}>↓</button>
+      </div>
+    </div>`).join('');
+  window._secs=secs;
+}
+async function secSave(id,patch){ try{ await LP.sections.save(id,patch); }catch(e){ alert('Errore: '+e.message); } }
+async function secToggle(id,field,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); await secSave(id,{[field]:v}); }
+async function secMove(id,dir){
+  const secs=window._secs, i=secs.findIndex(s=>s.id===id), j=i+dir;
+  if(j<0||j>=secs.length) return;
+  const a=secs[i],b=secs[j];
+  await Promise.all([LP.sections.save(a.id,{sort_order:b.sort_order}),LP.sections.save(b.id,{sort_order:a.sort_order})]);
+  renderSezioni();
+}
+
+/* ================= MATERIALI ================= */
+async function renderMateriali(){
+  const mats=await LP.materials.list(EV.id);
+  el('p-materiali').innerHTML=`
+   <div class="box">
+     <h3>Aggiungi materiale</h3>
+     <div class="sub">Documenti/immagini caricati su Storage; video e link tramite URL.</div>
+     <div class="grid2">
+       <div class="field"><label>Titolo</label><input class="inp" id="m_title" placeholder="Es. Slide keynote"></div>
+       <div class="field"><label>Tipo</label><select id="m_type" onchange="matTypeUI()">
+         <option value="pdf">PDF</option><option value="image">Immagine</option><option value="doc">Documento</option><option value="video">Video (link)</option><option value="link">Link</option></select></div>
+     </div>
+     <div class="field"><label>Descrizione</label><input class="inp" id="m_desc" placeholder="Sottotitolo breve"></div>
+     <div id="m_file_wrap" class="field"><label>File</label><div class="drop" id="m_drop" onclick="el('m_file').click()">Trascina o clicca per scegliere un file</div><input type="file" id="m_file" style="display:none"></div>
+     <div id="m_url_wrap" class="field" style="display:none"><label>URL (YouTube/Vimeo/MP4 o link)</label><input class="inp" id="m_url" placeholder="https://…"></div>
+     <div class="prog" id="m_prog"><i></i></div>
+     <div class="row"><button class="btn pri" id="m_add" onclick="addMaterial()">Aggiungi</button><span id="m_msg" style="font-size:13px;font-weight:700;color:var(--ok)"></span></div>
+   </div>
+   <div class="box"><h3>Materiali pubblicati</h3><div id="matList"></div></div>`;
+  const L=el('matList');
+  if(!mats.length){ L.innerHTML='<div class="empty">Nessun materiale.</div>'; return; }
+  L.innerHTML=mats.map((m,i)=>`<div class="item">
+    <div class="ico">${esc(m.icon||({pdf:'📄',doc:'📝',image:'🖼️',video:'🎥',link:'🔗'}[m.type]||'📎'))}</div>
+    <div class="it-main"><div class="it-t">${esc(m.title)}</div><div class="it-d">${esc(m.type.toUpperCase())} · ${esc(m.description||'')} · ${m.click_count||0} click</div></div>
+    <div class="it-acts">
+      <span class="tag ${m.published?'pub':'draft'}">${m.published?'live':'bozza'}</span>
+      <button class="sw ${m.published?'on':''}" onclick="matPub('${m.id}',this)" title="Pubblica/nascondi"></button>
+      <a class="btn sm" href="${esc(m.url)}" target="_blank" rel="noopener">Preview</a>
+      <button class="btn sm" onclick="matMove('${m.id}',-1)" ${i===0?'disabled':''}>↑</button>
+      <button class="btn sm" onclick="matMove('${m.id}',1)" ${i===mats.length-1?'disabled':''}>↓</button>
+      <button class="btn sm danger" onclick="matDel('${m.id}')">✕</button>
+    </div></div>`).join('');
+  window._mats=mats;
+}
+function matTypeUI(){ const t=el('m_type').value; const file=(t==='video'||t==='link'); el('m_file_wrap').style.display=file?'none':'block'; el('m_url_wrap').style.display=file?'block':'none'; }
+async function addMaterial(){
+  const title=el('m_title').value.trim(); const type=el('m_type').value; const desc=el('m_desc').value.trim();
+  if(!title){ alert('Inserisci un titolo.'); return; }
+  const b=el('m_add'); b.disabled=true;
+  try{
+    let url, is_external=false, meta={};
+    if(type==='video'||type==='link'){
+      url=el('m_url').value.trim(); if(!url){ alert('Inserisci un URL.'); b.disabled=false; return; }
+      is_external=true; if(/youtu/.test(url))meta.provider='youtube'; else if(/vimeo/.test(url))meta.provider='vimeo';
+    } else {
+      const f=el('m_file').files[0]; if(!f){ alert('Scegli un file.'); b.disabled=false; return; }
+      const path=EV.slug+'/materials/'+Date.now()+'-'+safe(f.name);
+      const pg=el('m_prog'); pg.classList.add('on'); pg.querySelector('i').style.width='40%';
+      url=await LP.storage.upload(path,f); pg.querySelector('i').style.width='100%';
+      meta={size:f.size,mime:f.type}; setTimeout(()=>pg.classList.remove('on'),400);
+    }
+    const order=(window._mats||[]).reduce((mx,m)=>Math.max(mx,m.sort_order),0)+10;
+    await LP.materials.create({event_id:EV.id,type,title,description:desc,url,is_external,meta,sort_order:order,published:true});
+    el('m_title').value='';el('m_desc').value='';if(el('m_url'))el('m_url').value='';el('m_file').value='';
+    el('m_msg').textContent='Aggiunto ✓'; renderMateriali(); refreshCounts();
+  }catch(e){ alert('Errore: '+e.message); }
+  finally{ b.disabled=false; }
+}
+async function matPub(id,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); try{await LP.materials.update(id,{published:v});renderMateriali();refreshCounts();}catch(e){alert(e.message);} }
+async function matDel(id){ if(!confirm('Eliminare il materiale?'))return; try{await LP.materials.remove(id);renderMateriali();refreshCounts();}catch(e){alert(e.message);} }
+async function matMove(id,dir){ const a=window._mats,i=a.findIndex(m=>m.id===id),j=i+dir; if(j<0||j>=a.length)return;
+  await Promise.all([LP.materials.update(a[i].id,{sort_order:a[j].sort_order}),LP.materials.update(a[j].id,{sort_order:a[i].sort_order})]); renderMateriali(); }
+
+/* ================= JOURNEY (zip microsite) ================= */
+async function renderJourney(){
+  const micros=await LP.microsites.list(EV.id);
+  el('p-journey').innerHTML=`
+   <div class="hintbar"><b>Microsite</b>: carica uno zip che contiene un sito HTML (es. <code>journey_v5/journey_v05.html</code>). I file vengono scompattati e ospitati su Storage, poi mostrati nel recap in un viewer navigabile.</div>
+   <div class="box">
+     <h3>Carica microsite (.zip)</h3>
+     <div class="field"><label>Titolo</label><input class="inp" id="j_title" placeholder="Rivivi la journey" value="Rivivi la journey"></div>
+     <div class="field"><label>Versione (opz.)</label><input class="inp" id="j_ver" placeholder="v5"></div>
+     <div class="field"><label>File ZIP</label><div class="drop" id="j_drop" onclick="el('j_zip').click()">Clicca per scegliere lo zip del microsite</div><input type="file" id="j_zip" accept=".zip" style="display:none" onchange="el('j_drop').textContent=this.files[0]?this.files[0].name:'Clicca per scegliere lo zip'"></div>
+     <div class="prog" id="j_prog"><i></i></div>
+     <div class="row"><button class="btn pri" id="j_btn" onclick="uploadMicrosite()">Carica e pubblica</button><span id="j_msg" style="font-size:13px;font-weight:700;color:var(--ink-soft)"></span></div>
+   </div>
+   <div class="box"><h3>Microsite caricati</h3><div id="jList"></div></div>`;
+  const L=el('jList');
+  if(!micros.length){ L.innerHTML='<div class="empty">Nessun microsite.</div>'; return; }
+  L.innerHTML=micros.map(m=>{const u=LP.storage.publicUrl(m.storage_prefix.replace(/\/$/,'')+'/'+m.entry_path.replace(/^\//,''));
+    return `<div class="item"><div class="ico">🚀</div>
+      <div class="it-main"><div class="it-t">${esc(m.title)} ${m.version?'· '+esc(m.version):''}</div><div class="it-d">${esc(m.entry_path)}</div></div>
+      <div class="it-acts">
+        <span class="tag ${m.published?'pub':'draft'}">${m.published?'live':'bozza'}</span>
+        <button class="sw ${m.published?'on':''}" onclick="jPub('${m.id}',this)"></button>
+        <a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">Apri</a>
+        <button class="btn sm danger" onclick="jDel('${m.id}')">✕</button>
+      </div></div>`;}).join('');
+}
+function pickEntry(paths){
+  const htmls=paths.filter(p=>/\.html?$/i.test(p));
+  if(!htmls.length) return null;
+  htmls.sort((a,b)=>{const sa=a.split('/').length,sb=b.split('/').length; if(sa!==sb)return sa-sb;
+    const ia=/index/i.test(a)?0:1, ib=/index/i.test(b)?0:1; if(ia!==ib)return ia-ib; return a.length-b.length;});
+  return htmls[0];
+}
+async function uploadMicrosite(){
+  const f=el('j_zip').files[0]; if(!f){ alert('Scegli uno zip.'); return; }
+  const title=el('j_title').value.trim()||'Microsite';
+  const b=el('j_btn'); b.disabled=true; const msg=el('j_msg'); msg.textContent='Leggo lo zip…';
+  const pg=el('j_prog'); pg.classList.add('on'); pg.querySelector('i').style.width='5%';
+  try{
+    const zip=await JSZip.loadAsync(f);
+    const files=[];
+    const names=Object.keys(zip.files);
+    for(const name of names){
+      const entry=zip.files[name];
+      if(entry.dir) continue;
+      if(/(^|\/)__MACOSX\//.test(name)||/(^|\/)\.DS_Store$/.test(name)) continue;
+      const blob=await entry.async('blob');
+      files.push({path:name, blob});
+    }
+    const entry=pickEntry(files.map(x=>x.path));
+    if(!entry){ throw new Error('Nessun file .html trovato nello zip.'); }
+    msg.textContent='Creo il record…';
+    const m=await LP.microsites.create({event_id:EV.id,title,version:el('j_ver').value.trim()||null,
+      storage_prefix:EV.slug+'/microsites/_tmp', entry_path:entry, published:false});
+    const prefix=EV.slug+'/microsites/'+m.id;
+    await LP.microsites.update(m.id,{storage_prefix:prefix});
+    msg.textContent='Carico '+files.length+' file…';
+    await LP.storage.uploadMany(prefix, files, (done,total)=>{ pg.querySelector('i').style.width=Math.round(done/total*100)+'%'; msg.textContent='Carico… '+done+'/'+total; });
+    await LP.microsites.update(m.id,{published:true});
+    msg.textContent='Fatto ✓'; setTimeout(()=>pg.classList.remove('on'),500);
+    el('j_zip').value=''; el('j_drop').textContent='Clicca per scegliere lo zip'; renderJourney();
+  }catch(e){ console.error(e); msg.textContent=''; alert('Errore upload microsite: '+e.message); }
+  finally{ b.disabled=false; }
+}
+async function jPub(id,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); try{await LP.microsites.update(id,{published:v});renderJourney();}catch(e){alert(e.message);} }
+async function jDel(id){ if(!confirm('Eliminare il microsite? (i file su Storage restano)'))return; try{await LP.microsites.remove(id);renderJourney();}catch(e){alert(e.message);} }
+
+/* ================= FOTO ================= */
+async function renderFoto(){
+  const photos=await LP.photos.list(EV.id);
+  el('p-foto').innerHTML=`
+   <div class="box"><h3>Carica foto</h3><div class="sub">Una o più immagini della giornata.</div>
+     <div class="field"><div class="drop" id="f_drop" onclick="el('f_in').click()">Clicca per scegliere immagini</div><input type="file" id="f_in" accept="image/*" multiple style="display:none" onchange="uploadPhotos()"></div>
+     <div class="prog" id="f_prog"><i></i></div></div>
+   <div class="box"><h3>Foto pubblicate</h3><div id="fList"></div></div>`;
+  const L=el('fList');
+  if(!photos.length){ L.innerHTML='<div class="empty">Nessuna foto.</div>'; return; }
+  L.innerHTML=photos.map((p,i)=>`<div class="item">
+     <div class="ico" style="background-image:url('${esc(LP.storage.publicUrl(p.storage_path))}');background-size:cover"></div>
+     <div class="it-main"><input class="inp" style="width:100%" value="${esc(p.caption||'')}" placeholder="Didascalia" onchange="photoCap('${p.id}',this.value)"></div>
+     <div class="it-acts">
+       <button class="sw ${p.published?'on':''}" onclick="photoPub('${p.id}',this)"></button>
+       <button class="btn sm" onclick="photoMove('${p.id}',-1)" ${i===0?'disabled':''}>↑</button>
+       <button class="btn sm" onclick="photoMove('${p.id}',1)" ${i===photos.length-1?'disabled':''}>↓</button>
+       <button class="btn sm danger" onclick="photoDel('${p.id}')">✕</button>
+     </div></div>`).join('');
+  window._photos=photos;
+}
+async function uploadPhotos(){
+  const fs=[...el('f_in').files]; if(!fs.length)return;
+  const pg=el('f_prog'); pg.classList.add('on');
+  let order=(window._photos||[]).reduce((mx,p)=>Math.max(mx,p.sort_order),0)+10;
+  try{
+    for(let i=0;i<fs.length;i++){
+      const f=fs[i]; const path=EV.slug+'/photos/'+Date.now()+'-'+safe(f.name);
+      await LP.storage.upload(path,f);
+      await LP.photos.create({event_id:EV.id,storage_path:path,sort_order:order,published:true});
+      order+=10; pg.querySelector('i').style.width=Math.round((i+1)/fs.length*100)+'%';
+    }
+    setTimeout(()=>pg.classList.remove('on'),400); renderFoto(); refreshCounts();
+  }catch(e){ alert('Errore: '+e.message); }
+}
+async function photoCap(id,v){ try{await LP.photos.update(id,{caption:v});}catch(e){alert(e.message);} }
+async function photoPub(id,btn){ const v=!btn.classList.contains('on'); btn.classList.toggle('on',v); try{await LP.photos.update(id,{published:v});}catch(e){alert(e.message);} }
+async function photoDel(id){ if(!confirm('Eliminare la foto?'))return; try{await LP.photos.remove(id);renderFoto();refreshCounts();}catch(e){alert(e.message);} }
+async function photoMove(id,dir){ const a=window._photos,i=a.findIndex(p=>p.id===id),j=i+dir; if(j<0||j>=a.length)return;
+  await Promise.all([LP.photos.update(a[i].id,{sort_order:a[j].sort_order}),LP.photos.update(a[j].id,{sort_order:a[i].sort_order})]); renderFoto(); }
+
+/* ================= TESTIMONIANZE ================= */
+let MFILTER='wait';
+async function renderTestimonianze(){
+  const data=(await readResponses(EV.id)).filter(e=>e.quote);
+  const wait=data.filter(e=>!e.approved&&!e.hidden), appr=data.filter(e=>e.approved&&!e.hidden);
+  el('p-testimonianze').innerHTML=`
+   <div class="hintbar"><b>Palco</b> = testimonianze <b>approvate</b>. <b>Recap pubblico</b> = approvate <b>con consenso social</b>.</div>
+   <div class="box">
+     <div class="row" style="justify-content:space-between">
+       <span class="live-dot"><i></i> ${data.length} totali</span>
+       <div class="row">
+         <button class="btn sm ${MFILTER==='wait'?'pri':''}" onclick="MFILTER='wait';renderTestimonianze()">Da approvare ${wait.length}</button>
+         <button class="btn sm ${MFILTER==='appr'?'pri':''}" onclick="MFILTER='appr';renderTestimonianze()">Approvate ${appr.length}</button>
+         <button class="btn sm ${MFILTER==='all'?'pri':''}" onclick="MFILTER='all';renderTestimonianze()">Tutte ${data.length}</button>
+         <button class="btn sm danger" onclick="wipeData()">✕ Azzera dati</button>
+       </div>
+     </div>
+   </div>
+   <div id="modList"></div>`;
+  let rows=MFILTER==='wait'?wait:MFILTER==='appr'?appr:data; rows=[...rows].reverse();
+  const L=el('modList');
+  if(!rows.length){ L.innerHTML='<div class="empty">Nessuna testimonianza in questa vista.</div>'; return; }
+  L.innerHTML=rows.map(e=>{
+    let who='Anonimo'; if(e.name&&e.company)who=esc(e.name)+', '+esc(e.company); else if(e.name)who=esc(e.name); else if(e.company)who=esc(e.company);
+    const social=e.social?'<span class="tag social">social</span>':'<span class="tag nosocial">no social</span>';
+    const state=e.approved?'<span class="tag appr">approvata</span>':'<span class="tag wait">in attesa</span>';
+    return `<div class="mcard ${e.hidden?'is-hidden':''}">
+      <div class="q">“${esc(e.quote)}”</div>
+      <div class="meta"><b>${who}</b> ${social} ${state} ${e.email?'· 📩 '+esc(e.email):''}</div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn sm ${e.approved?'ok':'pri'}" onclick="modApprove('${e.id}',${!e.approved})">${e.approved?'✓ Approvata':'Approva → palco'}</button>
+        <button class="btn sm" onclick="modHide('${e.id}',${!e.hidden})">${e.hidden?'Ripristina':'Nascondi'}</button>
+      </div></div>`;
   }).join('');
 }
-
-async function approve(id,val){
-  const ok=await setApproved(id,val);
-  if(ok){const r=DATA.find(x=>x.id===id);if(r)r.approved=val;render();}
-}
-async function hide(id,val){
-  const ok=await setHidden(id,val);
-  if(ok){const r=DATA.find(x=>x.id===id);if(r)r.hidden=val;render();}
-}
-
+async function modApprove(id,v){ if(await setApproved(id,v))renderTestimonianze(); }
+async function modHide(id,v){ if(await setHidden(id,v))renderTestimonianze(); }
 async function wipeData(){
-  if(typeof sb==='undefined'||!sb){ alert('Connessione al database non disponibile.'); return; }
-  // Conferma 1
-  if(!confirm('\u26A0\uFE0F ATTENZIONE\n\nStai per CANCELLARE TUTTE le risposte dal database.\nL\u0027operazione \u00E8 IRREVERSIBILE.\n\nUsala solo per ripulire dopo un test.\n\nProcedere?')) return;
-  // Conferma 2: digitare CANCELLA
-  const typed=prompt('Per confermare, scrivi:  CANCELLA');
-  if(typed===null) return;
-  if(typed.trim().toUpperCase()!=='CANCELLA'){ alert('Conferma non corretta. Operazione annullata.'); return; }
-  const b=document.getElementById('wipeBtn'); const old=b.textContent; b.textContent='Cancello\u2026'; b.disabled=true;
-  try{
-    const { data, error } = await sb.rpc('moderate_wipe_all',{ p_pwd:ADMIN_PWD, p_confirm:'CANCELLA' });
-    if(error) throw error;
-    DATA=[]; render();   // svuota e ridisegna l'admin (paintLive non esiste qui: era la causa del falso errore)
-    alert('Fatto. Risposte cancellate: '+(data!=null?data:'?')+'.\n\nLa dashboard si riallinea da sola entro ~15 secondi.\nPer vederla vuota subito, ricaricala (Cmd+R).');
-  }catch(e){
-    console.error('WIPE error (oggetto completo):', e);
-    const m=(e&&e.message)||'';
-    const det=[e&&e.message,e&&e.details,e&&e.hint,e&&e.code].filter(Boolean).join(' | ');
-    if(m.includes('unauthorized')) alert('Password non valida per questa operazione.');
-    else if(m.includes('confirm_required')) alert('Conferma mancante. Operazione annullata.');
-    else alert('La cancellazione non \u00E8 andata a buon fine.\n\nDettaglio dal database:\n'+(det||'(nessun messaggio)')+'\n\n(Questo testo aiuta a capire la causa esatta.)');
-  }finally{ b.textContent=old; b.disabled=false; }
+  if(!confirm('⚠️ Cancellare TUTTE le risposte di questo evento? Irreversibile.'))return;
+  const t=prompt('Scrivi CANCELLA per confermare:'); if(t===null)return;
+  if(t.trim().toUpperCase()!=='CANCELLA'){ alert('Conferma errata.'); return; }
+  try{ const { data, error }=await sb.rpc('moderate_wipe_all',{p_confirm:'CANCELLA',p_event:EV.id}); if(error)throw error;
+    alert('Cancellate '+(data!=null?data:'?')+' risposte.'); renderTestimonianze(); refreshCounts(); }
+  catch(e){ alert('Errore: '+(e.message||e)); }
 }
+
+/* ================= LEAD ================= */
+async function renderLead(){
+  const leads=await LP.leads.list(EV.id);
+  el('p-lead').innerHTML=`
+   <div class="box">
+     <div class="row" style="justify-content:space-between"><h3>Lead · contatti materiali (${leads.length})</h3>
+       <button class="btn" onclick="exportLeads()" ${leads.length?'':'disabled'}>Esporta CSV</button></div>
+     <div class="sub">Solo chi ha acconsentito a ricevere i materiali e ha lasciato l'email.</div>
+     ${leads.length?`<table><thead><tr><th>Nome</th><th>Email</th><th>Azienda</th><th>Data</th></tr></thead><tbody>
+       ${leads.map(l=>`<tr><td>${esc(l.name||'—')}</td><td>${esc(l.email)}</td><td>${esc(l.company||'—')}</td><td>${esc((l.created_at||'').slice(0,10))}</td></tr>`).join('')}
+       </tbody></table>`:'<div class="empty">Nessun lead.</div>'}
+   </div>`;
+  window._leads=leads;
+}
+function exportLeads(){
+  const leads=window._leads||[]; if(!leads.length)return;
+  const head=['name','email','company','created_at'];
+  const csv=[head.join(',')].concat(leads.map(l=>head.map(k=>`"${String(l[k]||'').replace(/"/g,'""')}"`).join(','))).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='lead-'+EV.slug+'.csv'; a.click();
+}
+
+/* ================= INIT ================= */
+el('email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+checkAuth();
 </script>
 </body>
 </html>
