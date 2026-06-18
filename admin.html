@@ -277,8 +277,8 @@ function renderEvento(){
        <div class="field"><label>Accent color</label><input class="inp" id="e_accent" type="color" value="${esc(c.accent||'#EB1000')}" style="height:42px"></div>
      </div>
      <div class="grid2">
-       <div class="field"><label>KPI · Speaker</label><input class="inp" id="e_speakers" type="number" value="${c.stats_speakers!=null?c.stats_speakers:''}"></div>
-       <div class="field"><label>KPI · Fasi flywheel</label><input class="inp" id="e_phases" type="number" value="${c.stats_phases!=null?c.stats_phases:''}"></div>
+       <div class="field"><label>KPI · Professionisti in sala</label><input class="inp" id="e_attendees" type="number" value="${c.stats_attendees!=null?c.stats_attendees:''}"></div>
+       <div class="field"><label>KPI · Aziende E&U</label><input class="inp" id="e_companies" type="number" value="${c.stats_companies!=null?c.stats_companies:''}"></div>
      </div>
      <div class="field"><label>Contatto footer</label><input class="inp" id="e_contact" value="${esc(c.footer_contact||'')}"></div>
      <div class="field"><label>Stato</label>
@@ -307,8 +307,8 @@ function renderEvento(){
 async function saveEvento(){
   const cfg=Object.assign({},EV.config||{},{
     badge:el('e_badge').value, accent:el('e_accent').value,
-    stats_speakers: el('e_speakers').value!==''?Number(el('e_speakers').value):null,
-    stats_phases: el('e_phases').value!==''?Number(el('e_phases').value):null,
+    stats_attendees: el('e_attendees').value!==''?Number(el('e_attendees').value):null,
+    stats_companies: el('e_companies').value!==''?Number(el('e_companies').value):null,
     footer_contact: el('e_contact').value
   });
   const patch={ name:el('e_name').value.trim(), slug:el('e_slug').value.trim(), subtitle:el('e_sub').value,
@@ -468,11 +468,14 @@ async function renderJourney(){
   const L=el('jList');
   if(!micros.length){ L.innerHTML='<div class="empty">Nessun microsite.</div>'; return; }
   L.innerHTML=micros.map(m=>{const u=LP.storage.publicUrl(m.storage_prefix.replace(/\/$/,'')+'/'+m.entry_path.replace(/^\//,''));
-    return `<div class="item"><div class="ico">🚀</div>
-      <div class="it-main"><div class="it-t">${esc(m.title)} ${m.version?'· '+esc(m.version):''}</div><div class="it-d">${esc(m.entry_path)}</div></div>
+    const cov=m.cover_path?LP.storage.publicUrl(m.cover_path):null;
+    return `<div class="item">
+      <div class="ico" style="${cov?`background-image:url('${esc(cov)}');background-size:cover;background-position:center`:''}">${cov?'':'🚀'}</div>
+      <div class="it-main"><div class="it-t">${esc(m.title)} ${m.version?'· '+esc(m.version):''}</div><div class="it-d">${esc(m.entry_path)}${cov?'':' · nessuna cover'}</div></div>
       <div class="it-acts">
         <span class="tag ${m.published?'pub':'draft'}">${m.published?'live':'bozza'}</span>
         <button class="sw ${m.published?'on':''}" onclick="jPub('${m.id}',this)"></button>
+        <button class="btn sm" onclick="jCoverPick('${m.id}','${esc(m.storage_prefix)}')">Cover</button>
         <button class="btn sm" onclick="jOpen('${u}')">Apri</button>
         <button class="btn sm danger" onclick="jDel('${m.id}')">✕</button>
       </div></div>`;}).join('');
@@ -483,6 +486,24 @@ function pickEntry(paths){
   htmls.sort((a,b)=>{const sa=a.split('/').length,sb=b.split('/').length; if(sa!==sb)return sa-sb;
     const ia=/index/i.test(a)?0:1, ib=/index/i.test(b)?0:1; if(ia!==ib)return ia-ib; return a.length-b.length;});
   return htmls[0];
+}
+// sceglie un'immagine di copertina: preferisce hero/cover, poi la "prima slide", poi la prima immagine
+function pickCover(paths){
+  const imgs=paths.filter(p=>/\.(png|jpe?g|webp)$/i.test(p) && !/\/(icons?|logos?)\b/i.test(p));
+  if(!imgs.length) return null;
+  const score=p=>{const n=p.toLowerCase().split('/').pop();
+    if(/hero|cover/.test(p.toLowerCase()))return 0; if(/^0?1[-_.]/.test(n))return 1; return 2;};
+  imgs.sort((a,b)=>score(a)-score(b)||a.length-b.length);
+  return imgs[0];
+}
+// cambia/imposta manualmente la cover di un microsite
+function jCoverPick(id,prefix){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+  inp.onchange=async()=>{ const f=inp.files[0]; if(!f) return;
+    try{ const path=prefix.replace(/\/$/,'')+'/cover-'+Date.now()+'-'+safe(f.name);
+      await LP.storage.upload(path,f); await LP.microsites.update(id,{cover_path:path}); renderJourney(); }
+    catch(e){ alert('Errore cover: '+e.message); } };
+  inp.click();
 }
 async function uploadMicrosite(){
   const f=el('j_zip').files[0]; if(!f){ alert('Scegli uno zip.'); return; }
@@ -509,7 +530,9 @@ async function uploadMicrosite(){
     await LP.microsites.update(m.id,{storage_prefix:prefix});
     msg.textContent='Carico '+files.length+' file…';
     await LP.storage.uploadMany(prefix, files, (done,total)=>{ pg.querySelector('i').style.width=Math.round(done/total*100)+'%'; msg.textContent='Carico… '+done+'/'+total; });
-    await LP.microsites.update(m.id,{published:true});
+    const coverRel=pickCover(files.map(x=>x.path));
+    const patch={published:true}; if(coverRel) patch.cover_path=prefix+'/'+coverRel;
+    await LP.microsites.update(m.id,patch);
     msg.textContent='Fatto ✓'; setTimeout(()=>pg.classList.remove('on'),500);
     el('j_zip').value=''; el('j_drop').textContent='Clicca per scegliere lo zip'; renderJourney();
   }catch(e){ console.error(e); msg.textContent=''; alert('Errore upload microsite: '+e.message); }

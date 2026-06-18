@@ -381,8 +381,8 @@
   .journey-frame{width:100%;aspect-ratio:16/9;display:block;border:0;background:#0A0A0A}
   .journey-cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:16px;background:var(--grad);color:#fff;cursor:pointer;text-align:center;padding:24px}
-  .journey-cover::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 16%,rgba(255,255,255,.2),transparent 46%)}
-  .journey-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+  .journey-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.34) 55%,rgba(0,0,0,.62) 100%)}
+  .journey-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:1}
   .journey-cover .play{position:relative;z-index:2;width:74px;height:74px;border-radius:99px;background:#fff;
     display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.3)}
   .journey-cover .play svg{margin-left:4px}
@@ -435,6 +435,15 @@
   .media-foot .mt{font-size:14.5px;font-weight:800;line-height:1.25}
   .media-foot .md{font-size:12px;color:var(--ink-faint);font-weight:600;margin-top:3px;line-height:1.35}
   .media-foot .open{margin-top:9px;font-size:11.5px;font-weight:800;color:var(--adobe-red);display:inline-flex;gap:5px;align-items:center}
+
+  /* ===== Insight / takeaway + onestà N + gerarchia grafici ===== */
+  .insight{margin-top:18px;font-size:13.5px;color:var(--ink-soft);font-weight:600;line-height:1.5;
+    background:var(--bg-soft);border-left:3px solid var(--adobe-red);padding:11px 15px;border-radius:0 10px 10px 0}
+  .insight b{color:var(--ink);font-weight:800}
+  .nnote{font-size:11.5px;color:var(--ink-faint);font-weight:700;letter-spacing:.01em;margin:-20px 0 22px}
+  .cap-bar .cf.dim{background:#D2D2D6}
+  .cap-bar.lead .cn{color:var(--ink)}
+  .cap-bar .cn b.rk{color:var(--adobe-red);font-weight:900;margin-right:6px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body class="prod-recap">
@@ -449,25 +458,42 @@
   </div>
   <div class="lp-wrap">
     <div class="lp-stats">
-      <div class="lp-stat"><div class="n" id="lpTotal">0</div><div class="l">PARTECIPANTI ATTIVI</div></div>
-      <div class="lp-stat"><div class="n" id="lpMat">0.0</div><div class="l">MATURITÀ CX MEDIA</div></div>
-      <div class="lp-stat"><div class="n" id="lpSpeakers">5</div><div class="l">SPEAKER</div></div>
-      <div class="lp-stat"><div class="n" id="lpPhases">7</div><div class="l">FASI DEL FLYWHEEL</div></div>
+      <div class="lp-stat"><div class="n" id="lpAttendees">24</div><div class="l">PROFESSIONISTI IN SALA</div></div>
+      <div class="lp-stat"><div class="n" id="lpCompanies">12</div><div class="l">AZIENDE E&amp;U</div></div>
+      <div class="lp-stat"><div class="n" id="lpMat">0.0</div><div class="l">MATURITÀ CX MEDIA / 5</div></div>
+      <div class="lp-stat"><div class="n" id="lpTop5">0%</div><div class="l">GIÀ ORCHESTRATI DALL'AI</div></div>
     </div>
+
+    <div class="lp-sec" id="secAudience">
+      <h2>Chi era in sala</h2>
+      <p class="lead" id="audLead">Una platea senior di Energy &amp; Utilities, per area di responsabilità.</p>
+      <div class="cap-list" id="lpRoles"></div>
+    </div>
+
+    <div class="lp-sec" id="secMaturity">
+      <h2>Quanto è matura la CX della sala</h2>
+      <p class="lead">Come i partecipanti valutano la propria maturità: da 1 (silos, processi manuali) a 5 (orchestrazione AI continua).</p>
+      <div class="cap-list" id="lpMatHist"></div>
+      <div class="insight" id="lpMatInsight"></div>
+    </div>
+
     <div class="lp-sec" data-section="topics">
       <h2 data-title>Le fasi che vi hanno colpito di più</h2>
-      <p class="lead">Abbiamo chiesto alla sala quale fase del volano contasse di più per le proprie priorità.</p>
-      <div class="topic-grid" id="lpTopics"></div>
+      <p class="lead">Quale fase del volano conta di più per le priorità della sala.</p>
+      <div class="cap-list" id="lpTopics"></div>
+      <div class="insight" id="lpTopicsInsight"></div>
     </div>
     <div class="lp-sec" data-section="caps">
       <h2 data-title>I temi più richiesti</h2>
       <p class="lead">Dove la sala vuole approfondire per prima — mappato sulle capability Adobe.</p>
       <div class="cap-list" id="lpCaps"></div>
+      <div class="insight" id="lpCapsInsight"></div>
     </div>
     <div class="lp-sec" data-section="ratings">
       <h2 data-title>Gli interventi più apprezzati</h2>
       <p class="lead">Il voto medio della sala su ogni intervento della giornata.</p>
       <div class="cap-list" id="lpRates"></div>
+      <div class="insight" id="lpRatesInsight"></div>
     </div>
     <div class="lp-sec" data-section="quotes">
       <h2 data-title>Le vostre parole</h2>
@@ -680,6 +706,17 @@ async function openJourneyTab(){
 
 /* ---- render principale ---- */
 function show(sec,on){const el=document.querySelector('.lp-sec[data-section="'+sec+'"]');if(el)el.hidden=!on;}
+function setTxt(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function setLead(id,t){const e=document.getElementById(id);if(e)e.textContent=t;}
+function setInsight(id,html){const e=document.getElementById(id);if(e){e.innerHTML=html||'';e.style.display=html?'':'none';}}
+function secHide(id,hide){const e=document.getElementById(id);if(e)e.hidden=!!hide;}
+/* barra orizzontale coerente: leader in accento, resto neutro */
+function bar(r){
+  return `<div class="cap-bar${r.lead?' lead':''}">`+
+    `<div class="cn">${r.rank?`<b class="rk">#${r.rank}</b>`:''}${esc(r.lab)}${r.sub?`<small>${esc(r.sub)}</small>`:''}</div>`+
+    `<div class="ct"><div class="cf${r.lead?'':' dim'}" style="width:${Math.max(4,r.pct||0)}%"></div></div>`+
+    `<div class="cv">${esc(String(r.right))}</div></div>`;
+}
 
 async function renderLP(){
   const ev=await getEvent();
@@ -692,30 +729,55 @@ async function renderLP(){
     const l=document.getElementById('lpLead'); if(l&&ev.subtitle)l.textContent=ev.subtitle;
     const b=document.getElementById('lpBadge'); if(b&&cfg.badge)b.textContent=cfg.badge;
     if(cfg.accent)document.documentElement.style.setProperty('--adobe-red',cfg.accent);
-    if(cfg.stats_speakers!=null)document.getElementById('lpSpeakers').textContent=cfg.stats_speakers;
-    if(cfg.stats_phases!=null)document.getElementById('lpPhases').textContent=cfg.stats_phases;
     const fc=document.getElementById('lpFootContact');
     if(fc&&cfg.footer_contact)fc.textContent='Grazie per aver orchestrato questa giornata con noi. Per qualsiasi necessità: '+cfg.footer_contact;
   }
 
   // --- dati ---
   const d=await Store.read();
-  document.getElementById('lpTotal').textContent=d.length||'—';
-  document.getElementById('lpMat').textContent=avgMat(d);
+  const N=d.length;
+  // scorecard orientate al target
+  const att=(cfg.stats_attendees!=null)?cfg.stats_attendees:(N||'—');
+  const comp=(cfg.stats_companies!=null)?cfg.stats_companies:'—';
+  setTxt('lpAttendees',att); setTxt('lpCompanies',comp); setTxt('lpMat',avgMat(d));
+  const q2v=d.filter(e=>e.q2).map(e=>e.q2), Nq2=q2v.length;
+  setTxt('lpTop5', (Nq2?Math.round(q2v.filter(v=>v>=5).length/Nq2*100):0)+'%');
 
-  const tot=d.length||1;
+  // CHI ERA IN SALA — mix ruoli (q4)
+  const ROLES=['Marketing & CX','Digital & IT','Data & Analytics','Leadership & Strategy'];
+  const roles=ROLES.map(v=>({lab:v,n:d.filter(e=>e.q4===v).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  const rTot=roles.reduce((s,x)=>s+x.n,0), rmax=Math.max(1,...roles.map(x=>x.n));
+  document.getElementById('lpRoles').innerHTML=roles.map((x,i)=>bar({lab:x.lab,pct:x.n/rmax*100,right:x.n+' · '+Math.round(x.n/(rTot||1)*100)+'%',lead:i===0})).join('');
+  setLead('audLead', `${att} professionisti, ${comp} aziende del settore Energy & Utilities — la voce di chi era in sala, su ${N} risposte alla survey.`);
+  secHide('secAudience', rTot===0);
+
+  // MATURITÀ — distribuzione 1→5
+  const MATLAB={1:'Silos, processi manuali',2:'Primi passi',3:'Integrazione parziale',4:'Buona orchestrazione',5:'Orchestrazione AI continua'};
+  const dist=[1,2,3,4,5].map(L=>({L,n:d.filter(e=>e.q2===L).length}));
+  const mmax=Math.max(1,...dist.map(x=>x.n));
+  document.getElementById('lpMatHist').innerHTML=dist.map(x=>bar({lab:'Livello '+x.L,sub:MATLAB[x.L],pct:x.n/mmax*100,right:String(x.n),lead:x.n===mmax&&x.n>0})).join('');
+  const mode=dist.reduce((a,b)=>b.n>a.n?b:a,{n:-1}), lvl5=dist[4].n;
+  setInsight('lpMatInsight', Nq2? `Maturità media <b>${avgMat(d)}/5</b>. Il <b>${Math.round(mode.n/Nq2*100)}%</b> si colloca al livello ${mode.L}; ${lvl5===0?'<b>nessuno</b> si dichiara pienamente orchestrato dall’AI (liv. 5)':lvl5+' al liv. 5'} — lo spazio di crescita è ampio. <span style="color:var(--ink-faint)">(su ${Nq2} risposte)</span>`:'');
+  secHide('secMaturity', Nq2===0);
+
+  // TOPICS (q1) — barre ordinate
   const c=TOPICS.map(([lab,val])=>({lab,val,n:d.filter(e=>e.q1===val).length})).sort((a,b)=>b.n-a.n);
-  document.getElementById('lpTopics').innerHTML=c.map((x,i)=>`<div class="topic-card"><div class="num">#${i+1} · ${Math.round(x.n/tot*100)}%</div><h4>${x.lab}</h4><p>${TD[x.val]||''}</p><div class="pct"><div class="pb"><div class="pf" style="width:${x.n/tot*100}%"></div></div><b>${x.n}</b></div></div>`).join('');
+  const tmax=Math.max(1,...c.map(x=>x.n)), ctot=c.reduce((s,x)=>s+x.n,0);
+  document.getElementById('lpTopics').innerHTML=c.map((x,i)=>bar({rank:i+1,lab:x.lab,sub:TD[x.val]||'',pct:x.n/tmax*100,right:x.n+' · '+Math.round(x.n/(ctot||1)*100)+'%',lead:i===0})).join('');
+  setInsight('lpTopicsInsight', ctot? `Priorità #1 della sala: <b>${esc(c[0].lab)}</b> — ${c[0].n} su ${ctot} risposte.`:'');
 
+  // CAPABILITY (q3)
   const cap=CAPS.map(([lab,benefit,prod])=>({lab:benefit,prod,key:lab,n:d.filter(e=>(e.q3||[]).includes(lab)).length})).sort((a,b)=>b.n-a.n);
-  const capTot=cap.reduce((s,x)=>s+x.n,0);
-  const cmax=Math.max(1,...cap.map(x=>x.n));
-  document.getElementById('lpCaps').innerHTML=cap.map(x=>`<div class="cap-bar"><div class="cn">${x.lab}<small>${x.prod}</small></div><div class="ct"><div class="cf" style="width:${x.n/cmax*100}%"></div></div><div class="cv">${x.n}</div></div>`).join('');
+  const capTot=cap.reduce((s,x)=>s+x.n,0), cmax=Math.max(1,...cap.map(x=>x.n));
+  document.getElementById('lpCaps').innerHTML=cap.map((x,i)=>bar({rank:i+1,lab:x.lab,sub:x.prod,pct:x.n/cmax*100,right:String(x.n),lead:i===0})).join('');
+  setInsight('lpCapsInsight', capTot? `Tema più richiesto: <b>${esc(cap[0].lab)}</b> · ${esc(cap[0].prod)}. <span style="color:var(--ink-faint)">(${capTot} preferenze, max 2 a persona)</span>`:'');
 
+  // RATINGS interventi
   const rt=TALKS.map(([k,lab,sub])=>({lab,sub,avg:avgRating(d,k),n:countRating(d,k)})).sort((a,b)=>b.avg-a.avg);
   const rateTot=rt.reduce((s,x)=>s+x.n,0);
   const lpr=document.getElementById('lpRates');
-  if(lpr)lpr.innerHTML=rt.map(r=>`<div class="cap-bar"><div class="cn">${r.lab}<small style="color:var(--ink-faint)">${r.sub}</small></div><div class="ct"><div class="cf" style="width:${r.avg/5*100}%;background:linear-gradient(135deg,#F5A623,#F7C254)"></div></div><div class="cv">${r.avg?r.avg.toFixed(1)+'★':'—'}</div></div>`).join('');
+  if(lpr)lpr.innerHTML=rt.map(r=>`<div class="cap-bar"><div class="cn">${esc(r.lab)}<small style="color:var(--ink-faint)">${esc(r.sub)}</small></div><div class="ct"><div class="cf" style="width:${r.avg/5*100}%;background:linear-gradient(135deg,#F5A623,#F7C254)"></div></div><div class="cv">${r.avg?r.avg.toFixed(1)+'★':'—'}</div></div>`).join('');
+  setInsight('lpRatesInsight', rateTot? `Più apprezzato: <b>${esc(rt[0].lab)}</b> — ${rt[0].avg.toFixed(1)}★ <span style="color:var(--ink-faint)">(su ${rt[0].n} voti)</span>.`:'');
 
   const qs=d.filter(e=>e.quote&&e.social&&e.approved);
   document.getElementById('lpQuotes').innerHTML=qs.map(e=>{let a='Partecipante';if(e.name&&e.company)a=e.name+', '+e.company;else if(e.name)a=e.name;else if(e.company)a=e.company;return `<div class="wall-q"><div class="qt">"${esc(e.quote)}"</div><div class="qa">— ${esc(a)}</div></div>`}).join('');
