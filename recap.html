@@ -316,7 +316,7 @@
   .lp-hero h1{font-size:35px;font-weight:900;letter-spacing:-.025em;line-height:1.1;position:relative;max-width:700px;margin:0 auto 14px}
   .lp-hero p{font-size:15px;opacity:.94;position:relative;max-width:520px;margin:0 auto;font-weight:600}
   .lp-wrap{max-width:1000px;margin:0 auto;padding:0 24px}
-  .lp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:-38px;position:relative;z-index:2}
+  .lp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:-38px;position:relative;z-index:2}
   .lp-stat{background:#fff;border-radius:16px;padding:24px 18px;text-align:center;box-shadow:var(--shadow)}
   .lp-stat .n{font-size:38px;font-weight:900;color:var(--adobe-red);letter-spacing:-.03em;line-height:1}
   .lp-stat .l{font-size:11.5px;color:var(--ink-faint);margin-top:8px;letter-spacing:.02em;font-weight:700}
@@ -363,7 +363,7 @@
   .lp-foot .fbtn{display:inline-block;background:var(--adobe-red);color:#fff;font-weight:800;font-size:14px;padding:14px 32px;border-radius:99px}
 
   @media(max-width:720px){
-    .kpi-row,.lp-stats{grid-template-columns:repeat(2,1fr)}
+    .kpi-row{grid-template-columns:repeat(2,1fr)}
     .dash-grid,.topic-grid,.mat-grid,.photo-strip{grid-template-columns:1fr}
     .lp-hero h1{font-size:27px}
     .cap-bar .cn{width:150px}
@@ -440,10 +440,20 @@
   .insight{margin-top:18px;font-size:13.5px;color:var(--ink-soft);font-weight:600;line-height:1.5;
     background:var(--bg-soft);border-left:3px solid var(--adobe-red);padding:11px 15px;border-radius:0 10px 10px 0}
   .insight b{color:var(--ink);font-weight:800}
-  .nnote{font-size:11.5px;color:var(--ink-faint);font-weight:700;letter-spacing:.01em;margin:-20px 0 22px}
-  .cap-bar .cf.dim{background:#D2D2D6}
-  .cap-bar.lead .cn{color:var(--ink)}
-  .cap-bar .cn b.rk{color:var(--adobe-red);font-weight:900;margin-right:6px;font-variant-numeric:tabular-nums}
+
+  /* ===== Bar chart component (.barc) — mobile-first, label sopra, barra piena ===== */
+  .cap-list{gap:16px}
+  .barc .bhd{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:7px}
+  .barc .blab{min-width:0}
+  .barc .blab .t{font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.2}
+  .barc .blab .t .rk{color:var(--ink-faint);font-weight:900;margin-right:7px;font-variant-numeric:tabular-nums}
+  .barc .blab .s{font-size:11.5px;color:var(--ink-faint);font-weight:600;margin-top:2px;line-height:1.3}
+  .barc .bv{font-size:14px;font-weight:900;color:var(--ink-soft);flex:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .barc .btr{height:12px;background:var(--bg-soft);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+  .barc .bfl{height:100%;border-radius:99px;background:#DEDEE3;transition:width 1s cubic-bezier(.4,0,.2,1)}
+  .barc.top .bfl{background:var(--grad)}
+  .barc.top .blab .t .rk,.barc.top .bv{color:var(--adobe-red)}
+  .barc.gold .bfl{background:linear-gradient(135deg,#F5A623,#F7C254)}
 </style>
 </head>
 <body class="prod-recap">
@@ -461,7 +471,6 @@
       <div class="lp-stat"><div class="n" id="lpAttendees">24</div><div class="l">PROFESSIONISTI IN SALA</div></div>
       <div class="lp-stat"><div class="n" id="lpCompanies">12</div><div class="l">AZIENDE E&amp;U</div></div>
       <div class="lp-stat"><div class="n" id="lpMat">0.0</div><div class="l">MATURITÀ CX MEDIA / 5</div></div>
-      <div class="lp-stat"><div class="n" id="lpTop5">0%</div><div class="l">GIÀ ORCHESTRATI DALL'AI</div></div>
     </div>
 
     <div class="lp-sec" id="secAudience">
@@ -710,12 +719,14 @@ function setTxt(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function setLead(id,t){const e=document.getElementById(id);if(e)e.textContent=t;}
 function setInsight(id,html){const e=document.getElementById(id);if(e){e.innerHTML=html||'';e.style.display=html?'':'none';}}
 function secHide(id,hide){const e=document.getElementById(id);if(e)e.hidden=!!hide;}
-/* barra orizzontale coerente: leader in accento, resto neutro */
+/* barra: etichetta+valore sopra, barra piena sotto. Leader in accento (top), oro per i rating (gold) */
 function bar(r){
-  return `<div class="cap-bar${r.lead?' lead':''}">`+
-    `<div class="cn">${r.rank?`<b class="rk">#${r.rank}</b>`:''}${esc(r.lab)}${r.sub?`<small>${esc(r.sub)}</small>`:''}</div>`+
-    `<div class="ct"><div class="cf${r.lead?'':' dim'}" style="width:${Math.max(4,r.pct||0)}%"></div></div>`+
-    `<div class="cv">${esc(String(r.right))}</div></div>`;
+  const cls='barc'+(r.top?' top':'')+(r.gold?' gold':'');
+  return `<div class="${cls}">`+
+    `<div class="bhd"><div class="blab"><div class="t">${r.rank?`<span class="rk">#${r.rank}</span>`:''}${esc(r.lab)}</div>${r.sub?`<div class="s">${esc(r.sub)}</div>`:''}</div>`+
+      `<div class="bv">${esc(String(r.right))}</div></div>`+
+    `<div class="btr"><div class="bfl" style="width:${Math.max(3,r.pct||0)}%"></div></div>`+
+  `</div>`;
 }
 
 async function renderLP(){
@@ -741,13 +752,12 @@ async function renderLP(){
   const comp=(cfg.stats_companies!=null)?cfg.stats_companies:'—';
   setTxt('lpAttendees',att); setTxt('lpCompanies',comp); setTxt('lpMat',avgMat(d));
   const q2v=d.filter(e=>e.q2).map(e=>e.q2), Nq2=q2v.length;
-  setTxt('lpTop5', (Nq2?Math.round(q2v.filter(v=>v>=5).length/Nq2*100):0)+'%');
 
   // CHI ERA IN SALA — mix ruoli (q4)
   const ROLES=['Marketing & CX','Digital & IT','Data & Analytics','Leadership & Strategy'];
   const roles=ROLES.map(v=>({lab:v,n:d.filter(e=>e.q4===v).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
   const rTot=roles.reduce((s,x)=>s+x.n,0), rmax=Math.max(1,...roles.map(x=>x.n));
-  document.getElementById('lpRoles').innerHTML=roles.map((x,i)=>bar({lab:x.lab,pct:x.n/rmax*100,right:x.n+' · '+Math.round(x.n/(rTot||1)*100)+'%',lead:i===0})).join('');
+  document.getElementById('lpRoles').innerHTML=roles.map((x,i)=>bar({lab:x.lab,pct:x.n/rmax*100,right:x.n+' · '+Math.round(x.n/(rTot||1)*100)+'%',top:i===0})).join('');
   setLead('audLead', `${att} professionisti, ${comp} aziende del settore Energy & Utilities — la voce di chi era in sala, su ${N} risposte alla survey.`);
   secHide('secAudience', rTot===0);
 
@@ -755,7 +765,7 @@ async function renderLP(){
   const MATLAB={1:'Silos, processi manuali',2:'Primi passi',3:'Integrazione parziale',4:'Buona orchestrazione',5:'Orchestrazione AI continua'};
   const dist=[1,2,3,4,5].map(L=>({L,n:d.filter(e=>e.q2===L).length}));
   const mmax=Math.max(1,...dist.map(x=>x.n));
-  document.getElementById('lpMatHist').innerHTML=dist.map(x=>bar({lab:'Livello '+x.L,sub:MATLAB[x.L],pct:x.n/mmax*100,right:String(x.n),lead:x.n===mmax&&x.n>0})).join('');
+  document.getElementById('lpMatHist').innerHTML=dist.map(x=>bar({lab:'Livello '+x.L,sub:MATLAB[x.L],pct:x.n/mmax*100,right:x.n+(Nq2?' · '+Math.round(x.n/Nq2*100)+'%':''),top:x.n===mmax&&x.n>0})).join('');
   const mode=dist.reduce((a,b)=>b.n>a.n?b:a,{n:-1}), lvl5=dist[4].n;
   setInsight('lpMatInsight', Nq2? `Maturità media <b>${avgMat(d)}/5</b>. Il <b>${Math.round(mode.n/Nq2*100)}%</b> si colloca al livello ${mode.L}; ${lvl5===0?'<b>nessuno</b> si dichiara pienamente orchestrato dall’AI (liv. 5)':lvl5+' al liv. 5'} — lo spazio di crescita è ampio. <span style="color:var(--ink-faint)">(su ${Nq2} risposte)</span>`:'');
   secHide('secMaturity', Nq2===0);
@@ -763,20 +773,20 @@ async function renderLP(){
   // TOPICS (q1) — barre ordinate
   const c=TOPICS.map(([lab,val])=>({lab,val,n:d.filter(e=>e.q1===val).length})).sort((a,b)=>b.n-a.n);
   const tmax=Math.max(1,...c.map(x=>x.n)), ctot=c.reduce((s,x)=>s+x.n,0);
-  document.getElementById('lpTopics').innerHTML=c.map((x,i)=>bar({rank:i+1,lab:x.lab,sub:TD[x.val]||'',pct:x.n/tmax*100,right:x.n+' · '+Math.round(x.n/(ctot||1)*100)+'%',lead:i===0})).join('');
+  document.getElementById('lpTopics').innerHTML=c.map((x,i)=>bar({rank:i+1,lab:x.lab,sub:TD[x.val]||'',pct:x.n/tmax*100,right:x.n+' · '+Math.round(x.n/(ctot||1)*100)+'%',top:i===0})).join('');
   setInsight('lpTopicsInsight', ctot? `Priorità #1 della sala: <b>${esc(c[0].lab)}</b> — ${c[0].n} su ${ctot} risposte.`:'');
 
   // CAPABILITY (q3)
   const cap=CAPS.map(([lab,benefit,prod])=>({lab:benefit,prod,key:lab,n:d.filter(e=>(e.q3||[]).includes(lab)).length})).sort((a,b)=>b.n-a.n);
   const capTot=cap.reduce((s,x)=>s+x.n,0), cmax=Math.max(1,...cap.map(x=>x.n));
-  document.getElementById('lpCaps').innerHTML=cap.map((x,i)=>bar({rank:i+1,lab:x.lab,sub:x.prod,pct:x.n/cmax*100,right:String(x.n),lead:i===0})).join('');
+  document.getElementById('lpCaps').innerHTML=cap.map((x,i)=>bar({rank:i+1,lab:x.lab,sub:x.prod,pct:x.n/cmax*100,right:String(x.n),top:i===0})).join('');
   setInsight('lpCapsInsight', capTot? `Tema più richiesto: <b>${esc(cap[0].lab)}</b> · ${esc(cap[0].prod)}. <span style="color:var(--ink-faint)">(${capTot} preferenze, max 2 a persona)</span>`:'');
 
   // RATINGS interventi
   const rt=TALKS.map(([k,lab,sub])=>({lab,sub,avg:avgRating(d,k),n:countRating(d,k)})).sort((a,b)=>b.avg-a.avg);
   const rateTot=rt.reduce((s,x)=>s+x.n,0);
   const lpr=document.getElementById('lpRates');
-  if(lpr)lpr.innerHTML=rt.map(r=>`<div class="cap-bar"><div class="cn">${esc(r.lab)}<small style="color:var(--ink-faint)">${esc(r.sub)}</small></div><div class="ct"><div class="cf" style="width:${r.avg/5*100}%;background:linear-gradient(135deg,#F5A623,#F7C254)"></div></div><div class="cv">${r.avg?r.avg.toFixed(1)+'★':'—'}</div></div>`).join('');
+  if(lpr)lpr.innerHTML=rt.map(r=>bar({lab:r.lab,sub:r.sub,pct:r.avg/5*100,right:r.avg?r.avg.toFixed(1)+'★':'—',gold:true})).join('');
   setInsight('lpRatesInsight', rateTot? `Più apprezzato: <b>${esc(rt[0].lab)}</b> — ${rt[0].avg.toFixed(1)}★ <span style="color:var(--ink-faint)">(su ${rt[0].n} voti)</span>.`:'');
 
   const qs=d.filter(e=>e.quote&&e.social&&e.approved);
