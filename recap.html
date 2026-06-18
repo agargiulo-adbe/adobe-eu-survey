@@ -408,6 +408,33 @@
     font-size:18px;display:flex;align-items:center;justify-content:center;flex:none}
   .lb-body{flex:1;background:#000;display:flex;align-items:center;justify-content:center;min-height:0}
   .lb-body iframe,.lb-body video{width:100%;height:100%;border:0;background:#000}
+  .lb-head .lb-t{flex:1}
+  .lb-bar{display:flex;align-items:center;gap:8px}
+  .lb-bar a,.lb-bar button{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);color:#fff;
+    border:1px solid rgba(255,255,255,.16);padding:7px 12px;border-radius:99px;font-size:12px;font-weight:800;
+    font-family:inherit;cursor:pointer;text-decoration:none;white-space:nowrap}
+  .lb-bar a:hover,.lb-bar button:hover{background:rgba(255,255,255,.2)}
+  .lb-body.pdf{display:block;padding:0;background:#202024}
+  .lb-pdf{height:100%;width:100%;overflow:auto;padding:16px;display:flex;flex-direction:column;align-items:center;gap:14px;-webkit-overflow-scrolling:touch}
+  .lb-pdf canvas{max-width:100%;height:auto;background:#fff;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+  .lb-pdf .loading{color:#9A9DA3;font-size:13px;font-weight:700;padding:34px;text-align:center}
+
+  /* ===== Media-card materiali (box anteprima) ===== */
+  .media-card{display:flex;flex-direction:column;text-align:left;background:#fff;border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;cursor:pointer;width:100%;font-family:inherit;color:inherit;transition:.2s;padding:0}
+  .media-card:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+  .media-thumb{position:relative;aspect-ratio:4/3;background:var(--bg-soft);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .media-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
+  .media-thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:46px;background:var(--grad);color:#fff}
+  .media-thumb .ph.alt{background:linear-gradient(135deg,#2A2A2A,#5A5A5A)}
+  .media-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.62);color:#fff;font-size:10.5px;
+    font-weight:800;letter-spacing:.04em;padding:4px 9px;border-radius:99px;backdrop-filter:blur(4px)}
+  .media-play{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:99px;background:rgba(255,255,255,.92);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .media-foot{padding:14px 15px 15px}
+  .media-foot .mt{font-size:14.5px;font-weight:800;line-height:1.25}
+  .media-foot .md{font-size:12px;color:var(--ink-faint);font-weight:600;margin-top:3px;line-height:1.35}
+  .media-foot .open{margin-top:9px;font-size:11.5px;font-weight:800;color:var(--adobe-red);display:inline-flex;gap:5px;align-items:center}
 </style>
 </head>
 <body class="prod-recap">
@@ -477,6 +504,7 @@
   <div class="lb-box">
     <div class="lb-head">
       <span class="lb-t" id="lbTitle"></span>
+      <div class="lb-bar" id="lbActions"></div>
       <button class="lb-x" onclick="closeLb()" aria-label="Chiudi">&times;</button>
     </div>
     <div class="lb-body" id="lbBody"></div>
@@ -513,21 +541,96 @@ let JOURNEY_URL='';     // url entry microsite (per launch/fullscreen/nuova sche
 function ytEmbed(u){const m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);return m?'https://www.youtube.com/embed/'+m[1]+'?autoplay=1':null;}
 function vimeoEmbed(u){const m=u.match(/vimeo\.com\/(?:video\/)?(\d+)/);return m?'https://player.vimeo.com/video/'+m[1]+'?autoplay=1':null;}
 
-function openLb(title,inner){
+/* card materiale con box anteprima (tutti i tipi) */
+const PLAY_SVG='<svg width="22" height="22" viewBox="0 0 24 24" fill="#EB1000"><path d="M7 5v14l12-7z"/></svg>';
+function mediaCard(m){
+  const meta=m.meta||{};
+  let thumb, badge=MAT_LABEL[m.type]||'';
+  if(m.type==='pdf'){
+    badge='PDF'+(meta.pages?' · '+meta.pages+' pag':'');
+    thumb = meta.thumb ? `<img src="${esc(meta.thumb)}" alt="" loading="lazy">`
+                       : `<div class="ph" data-pdf="${esc(m.url)}">📄</div>`;
+  } else if(m.type==='image'){
+    thumb = `<img src="${esc(meta.thumb||m.url)}" alt="" loading="lazy">`; badge='Immagine';
+  } else if(m.type==='video'){
+    thumb = (meta.poster?`<img src="${esc(meta.poster)}" alt="">`:`<div class="ph alt"></div>`)+`<div class="media-play">${PLAY_SVG}</div>`; badge='Video';
+  } else {
+    thumb = `<div class="ph${m.type==='link'?' alt':''}">${esc(m.icon||MAT_ICON[m.type]||'📎')}</div>`;
+  }
+  return `<button class="media-card" onclick="openMaterial('${m.id}')">`+
+    `<div class="media-thumb">${thumb}${badge?`<span class="media-badge">${esc(badge)}</span>`:''}</div>`+
+    `<div class="media-foot"><div class="mt">${esc(m.title)}</div>${m.description?`<div class="md">${esc(m.description)}</div>`:''}<span class="open">Apri →</span></div>`+
+  `</button>`;
+}
+/* fallback: per i PDF senza miniatura salvata, renderizza la 1ª pagina quando entra in viewport */
+function queuePdfThumbs(){
+  const els=[...document.querySelectorAll('.media-thumb .ph[data-pdf]')];
+  if(!els.length || !('IntersectionObserver' in window)) return;
+  const io=new IntersectionObserver(ents=>ents.forEach(async e=>{
+    if(!e.isIntersecting) return; io.unobserve(e.target);
+    const url=e.target.getAttribute('data-pdf'), box=e.target.closest('.media-thumb');
+    try{
+      const pdfjsLib=await LP.pdfjs();
+      const pdf=await pdfjsLib.getDocument(url).promise;
+      const page=await pdf.getPage(1);
+      const vp1=page.getViewport({scale:1}), W=360, vp=page.getViewport({scale:W/vp1.width});
+      const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+      await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+      if(box){ const img=document.createElement('img'); img.src=cv.toDataURL('image/jpeg',.8); box.insertBefore(img,box.firstChild); e.target.remove(); }
+    }catch(err){ /* lascia il placeholder 📄 */ }
+  }),{rootMargin:'250px'});
+  els.forEach(el=>io.observe(el));
+}
+function openLb(title,inner,actions,mode){
   document.getElementById('lbTitle').textContent=title||'';
-  document.getElementById('lbBody').innerHTML=inner;
+  document.getElementById('lbActions').innerHTML=actions||'';
+  const body=document.getElementById('lbBody');
+  body.className='lb-body'+(mode?' '+mode:'');
+  body.innerHTML=inner;
   document.getElementById('lb').classList.add('on');
 }
 function closeLb(){
   document.getElementById('lb').classList.remove('on');
-  document.getElementById('lbBody').innerHTML='';   // ferma video/iframe
+  document.getElementById('lbBody').innerHTML='';   // ferma video/iframe/canvas
+  document.getElementById('lbActions').innerHTML='';
+  document.getElementById('lbBody').className='lb-body';
+}
+function openMaterialTab(url){ window.open(url,'_blank','noopener'); }
+
+/* Viewer PDF (PDF.js): scroll continuo, mobile-safe */
+async function openPdf(m){
+  LP.materials.click(m.id);
+  const url=m.url;
+  const actions=`<span id="pdfPg" style="color:#9A9DA3;font-size:12px;font-weight:700"></span>`+
+    `<a href="${esc(url)}" download target="_blank" rel="noopener">⤓ Scarica</a>`+
+    `<button onclick="openMaterialTab('${esc(url)}')">↗ Apri</button>`;
+  openLb(m.title,`<div class="lb-pdf" id="lbPdf"><div class="loading">Caricamento PDF…</div></div>`,actions,'pdf');
+  try{
+    const pdfjsLib=await LP.pdfjs();
+    const pdf=await pdfjsLib.getDocument(url).promise;
+    const cont=document.getElementById('lbPdf'); if(!cont) return; cont.innerHTML='';
+    const pg=document.getElementById('pdfPg'); if(pg) pg.textContent=pdf.numPages+' pag';
+    const W=Math.min(900,(cont.clientWidth||900)-32), dpr=window.devicePixelRatio||1;
+    for(let n=1;n<=pdf.numPages;n++){
+      if(!document.getElementById('lbPdf')) return;          // lightbox chiusa
+      const page=await pdf.getPage(n);
+      const vp1=page.getViewport({scale:1});
+      const vp=page.getViewport({scale:(W/vp1.width)*dpr});
+      const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height; cv.style.width=W+'px';
+      cont.appendChild(cv);
+      await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    }
+  }catch(e){
+    const cont=document.getElementById('lbPdf');
+    if(cont) cont.innerHTML=`<div class="loading">Impossibile mostrare il PDF.<br><a href="${esc(url)}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">Aprilo qui →</a></div>`;
+  }
 }
 
 function openMaterial(id){
   const m=MATS[id]; if(!m) return;
-  LP.materials.click(id);
   const url=m.url;
-  if(m.type==='pdf'){ openLb(m.title,`<iframe src="${esc(url)}#toolbar=1" title="${esc(m.title)}"></iframe>`); return; }
+  if(m.type==='pdf'){ openPdf(m); return; }
+  LP.materials.click(id);
   if(m.type==='image'){ openLb(m.title,`<img src="${esc(url)}" alt="${esc(m.title)}" style="max-width:100%;max-height:100%;object-fit:contain">`); return; }
   if(m.type==='video'){
     const emb=ytEmbed(url)||vimeoEmbed(url);
@@ -630,7 +733,8 @@ async function renderLP(){
 
   // materiali
   MATS={}; mats.forEach(m=>MATS[m.id]=m);
-  document.getElementById('lpMats').innerHTML=mats.map(m=>`<button class="mat-card" onclick="openMaterial('${m.id}')"><div class="mi">${esc(m.icon||MAT_ICON[m.type]||'📎')}</div><div><div class="mt">${esc(m.title)}</div><div class="md">${esc(m.description||'')}</div><span class="mtype">${MAT_LABEL[m.type]||''}</span></div></button>`).join('');
+  document.getElementById('lpMats').innerHTML=mats.map(mediaCard).join('');
+  queuePdfThumbs();
 
   // journey microsite
   const j=micros[0];

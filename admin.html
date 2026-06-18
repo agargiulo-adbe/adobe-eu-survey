@@ -387,9 +387,10 @@ async function renderMateriali(){
    <div class="box"><h3>Materiali pubblicati</h3><div id="matList"></div></div>`;
   const L=el('matList');
   if(!mats.length){ L.innerHTML='<div class="empty">Nessun materiale.</div>'; return; }
-  L.innerHTML=mats.map((m,i)=>`<div class="item">
-    <div class="ico">${esc(m.icon||({pdf:'📄',doc:'📝',image:'🖼️',video:'🎥',link:'🔗'}[m.type]||'📎'))}</div>
-    <div class="it-main"><div class="it-t">${esc(m.title)}</div><div class="it-d">${esc(m.type.toUpperCase())} · ${esc(m.description||'')} · ${m.click_count||0} click</div></div>
+  L.innerHTML=mats.map((m,i)=>{const th=(m.meta||{}).thumb;
+   return `<div class="item">
+    ${th?`<div class="ico" style="background-image:url('${esc(th)}');background-size:cover;background-position:top"></div>`:`<div class="ico">${esc(m.icon||({pdf:'📄',doc:'📝',image:'🖼️',video:'🎥',link:'🔗'}[m.type]||'📎'))}</div>`}
+    <div class="it-main"><div class="it-t">${esc(m.title)}</div><div class="it-d">${esc(m.type.toUpperCase())}${(m.meta||{}).pages?' · '+m.meta.pages+' pag':''} · ${esc(m.description||'')} · ${m.click_count||0} click</div></div>
     <div class="it-acts">
       <span class="tag ${m.published?'pub':'draft'}">${m.published?'live':'bozza'}</span>
       <button class="sw ${m.published?'on':''}" onclick="matPub('${m.id}',this)" title="Pubblica/nascondi"></button>
@@ -397,7 +398,7 @@ async function renderMateriali(){
       <button class="btn sm" onclick="matMove('${m.id}',-1)" ${i===0?'disabled':''}>↑</button>
       <button class="btn sm" onclick="matMove('${m.id}',1)" ${i===mats.length-1?'disabled':''}>↓</button>
       <button class="btn sm danger" onclick="matDel('${m.id}')">✕</button>
-    </div></div>`).join('');
+    </div></div>`;}).join('');
   window._mats=mats;
 }
 function matTypeUI(){ const t=el('m_type').value; const file=(t==='video'||t==='link'); el('m_file_wrap').style.display=file?'none':'block'; el('m_url_wrap').style.display=file?'block':'none'; }
@@ -416,6 +417,21 @@ async function addMaterial(){
       const pg=el('m_prog'); pg.classList.add('on'); pg.querySelector('i').style.width='40%';
       url=await LP.storage.upload(path,f); pg.querySelector('i').style.width='100%';
       meta={size:f.size,mime:f.type}; setTimeout(()=>pg.classList.remove('on'),400);
+      if(type==='image'){ meta.thumb=url; }
+      if(type==='pdf'){
+        try{
+          el('m_msg').textContent='Genero anteprima…';
+          const pdfjsLib=await LP.pdfjs();
+          const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+          meta.pages=pdf.numPages;
+          const page=await pdf.getPage(1);
+          const vp1=page.getViewport({scale:1}), W=480, vp=page.getViewport({scale:W/vp1.width});
+          const cv=document.createElement('canvas'); cv.width=vp.width; cv.height=vp.height;
+          await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+          const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.82));
+          meta.thumb=await LP.storage.upload(EV.slug+'/materials/thumbs/'+Date.now()+'.jpg',blob);
+        }catch(err){ console.warn('thumb pdf', err); }
+      }
     }
     const order=(window._mats||[]).reduce((mx,m)=>Math.max(mx,m.sort_order),0)+10;
     await LP.materials.create({event_id:EV.id,type,title,description:desc,url,is_external,meta,sort_order:order,published:true});

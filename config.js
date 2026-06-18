@@ -129,6 +129,22 @@ const LP = {
     onChange(cb){ return sb.auth.onAuthStateChange((_e, session)=>cb(session)); }
   },
 
+  // ----- pdf.js (caricato pigro: serve solo per miniature/viewer PDF) -----
+  _pdfjs: null,
+  pdfjs(){
+    if(LP._pdfjs) return LP._pdfjs;
+    const WK='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    LP._pdfjs = new Promise((resolve,reject)=>{
+      if(window.pdfjsLib){ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=WK; }catch(e){} return resolve(window.pdfjsLib); }
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=()=>{ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=WK; resolve(window.pdfjsLib); }catch(e){ reject(e); } };
+      s.onerror=()=>reject(new Error('pdf.js load failed'));
+      document.head.appendChild(s);
+    });
+    return LP._pdfjs;
+  },
+
   // ----- storage -----
   storage: {
     // deduce il MIME dall'estensione: i blob da JSZip non hanno `type`, e senza

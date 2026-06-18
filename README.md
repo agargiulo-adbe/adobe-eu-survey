@@ -109,3 +109,7 @@ Il login email+password funziona anche in locale senza configurazioni aggiuntive
   Storage (`LP.storage.pathFromUrl` / `removePrefix`), niente file orfani.
 - **Auth**: login email+password; la tabella `moderators` autorizza le scritture via
   `is_moderator()` + RLS. Vedi il [report di debug end-to-end](docs/DEBUG-REPORT.md).
+- **Anteprima PDF**: le card materiali mostrano una **miniatura** della prima pagina (generata
+  all'upload con PDF.js, salvata in `meta.thumb`); il clic apre un **viewer PDF.js** a scroll
+  continuo (zoom/download/nuova scheda) che funziona anche su mobile, dove l'iframe nativo dei
+  PDF resta vuoto. PDF.js è caricato pigro via `LP.pdfjs()`.
