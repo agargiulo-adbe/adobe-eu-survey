@@ -4,15 +4,16 @@
 -- Da eseguire DOPO 03_events_content.sql.
 --
 -- Sostituisce la "password condivisa" con account reali Supabase Auth:
---   • i moderatori entrano via magic-link (email)
+--   • i moderatori entrano con EMAIL + PASSWORD (nessuna email inviata)
 --   • la tabella `moderators` è l'allowlist di chi può scrivere
 --   • RLS: lettura pubblica dei soli contenuti `published`, scrittura ai moderatori
 --   • Storage bucket `event-assets`: lettura pubblica, upload solo moderatori
 --
 -- PREREQUISITO dashboard Supabase (una tantum, non SQL):
---   Authentication > Providers > Email  -> abilita "Email" e i magic-link.
---   Authentication > URL Configuration  -> aggiungi l'URL di admin.html
---                                           come Redirect URL consentito.
+--   Authentication > Users > Add user  -> crea l'utente moderatore con una
+--     password e "Auto Confirm User" = ON (così il login NON richiede email).
+--   L'email dell'utente deve coincidere con una riga in `moderators` (sotto).
+--   (Magic-link / SMTP / Redirect URL servono SOLO per l'eventuale reset password.)
 -- =====================================================================
 
 -- ---------------------------------------------------------------------

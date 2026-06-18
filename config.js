@@ -106,9 +106,19 @@ async function setHidden(id, val){
 const LP = {
   // ----- auth -----
   auth: {
+    // login principale: email + password (nessuna email inviata)
+    async signInPassword(email, password){
+      return sb.auth.signInWithPassword({ email, password });
+    },
+    // magic-link: fallback opzionale (richiede consegna email funzionante)
     async signIn(email){
       const redirect = location.href.split('#')[0];
       return sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirect } });
+    },
+    // reset password: opzionale, richiede SMTP configurato
+    async resetPassword(email){
+      const redirect = location.href.split('#')[0];
+      return sb.auth.resetPasswordForEmail(email, { redirectTo: redirect });
     },
     async signOut(){ return sb.auth.signOut(); },
     async user(){ return (await sb.auth.getUser()).data.user || null; },

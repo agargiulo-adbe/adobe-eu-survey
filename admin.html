@@ -112,10 +112,12 @@
   <div class="gate-card">
     <div class="logo">Adobe</div>
     <h1>Live Pulse · Console</h1>
-    <p>Accesso riservato ai moderatori · login via magic-link</p>
-    <input id="email" type="email" placeholder="La tua email" autocomplete="email">
-    <button id="loginBtn" onclick="doLogin()">Invia link di accesso</button>
+    <p>Accesso riservato ai moderatori</p>
+    <input id="email" type="email" placeholder="Email" autocomplete="username" style="margin-bottom:10px">
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="loginBtn" onclick="doLogin()">Entra</button>
     <div class="gate-msg" id="gateMsg"></div>
+    <div style="margin-top:14px"><a href="#" id="forgot" onclick="doReset(event)" style="font-size:12.5px;color:var(--ink-faint)">Password dimenticata?</a></div>
   </div>
 </div>
 
@@ -169,14 +171,32 @@ let EVENTS=[], EV=null, USER=null, TAB='evento';
 /* ================= AUTH ================= */
 async function doLogin(){
   const email=el('email').value.trim();
+  const password=el('password').value;
   const msg=el('gateMsg');
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.className='gate-msg err'; msg.textContent='Inserisci un indirizzo email valido.'; return; }
-  const b=el('loginBtn'); b.disabled=true; b.textContent='Invio…';
-  const { error } = await LP.auth.signIn(email);
-  b.disabled=false; b.textContent='Invia link di accesso';
+  if(!password){ msg.className='gate-msg err'; msg.textContent='Inserisci la password.'; return; }
+  const b=el('loginBtn'); b.disabled=true; b.textContent='Accesso…';
+  const { error } = await LP.auth.signInPassword(email,password);
+  b.disabled=false; b.textContent='Entra';
+  if(error){
+    const m=(error.message||'').toLowerCase();
+    msg.className='gate-msg err';
+    if(m.includes('invalid login')) msg.textContent='Email o password non corretti.';
+    else if(m.includes('not confirmed')||m.includes('confirm')) msg.textContent='Account non confermato. Crealo dal dashboard con "Auto Confirm User" attivo.';
+    else msg.textContent='Errore: '+error.message;
+    return;
+  }
+  // successo: onChange -> checkAuth() mostra l'app
+}
+async function doReset(e){
+  if(e) e.preventDefault();
+  const email=el('email').value.trim();
+  const msg=el('gateMsg');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.className='gate-msg err'; msg.textContent='Inserisci prima la tua email, poi clicca di nuovo.'; return; }
+  const { error } = await LP.auth.resetPassword(email);
   if(error){ msg.className='gate-msg err'; msg.textContent='Errore: '+error.message; return; }
   msg.className='gate-msg ok';
-  msg.textContent='Ti abbiamo inviato un link di accesso a '+email+'. Aprilo da questo dispositivo per entrare.';
+  msg.textContent='Se l\'SMTP è configurato riceverai un\'email di reset. Altrimenti chiedi al super_admin di reimpostarla dal dashboard.';
 }
 async function doLogout(){ await LP.auth.signOut(); location.reload(); }
 
@@ -586,7 +606,8 @@ function exportLeads(){
 }
 
 /* ================= INIT ================= */
-el('email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+el('email').addEventListener('keydown',e=>{if(e.key==='Enter')el('password').focus();});
+el('password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 checkAuth();
 </script>
 </body>

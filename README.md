@@ -32,21 +32,23 @@ un nuovo evento = una riga nel DB + contenuti caricati dalla console, **zero cod
    - `sql/01_*.sql`, `sql/02_admin_moderation.sql` (schema base — già presenti sul progetto)
    - `sql/03_events_content.sql` (schema multi-evento + contenuti + seed evento `adobe-eu-2026`)
    - `sql/04_auth_storage.sql` (Auth, `moderators`, RLS, bucket Storage, moderazione)
-2. **Authentication → Sign In / Providers**: abilita **Email** (magic-link). In test
-   conviene disattivare *Confirm email*.
-3. **Authentication → URL Configuration**:
-   - *Site URL*: `https://agargiulo-adbe.github.io/adobe-eu-survey/admin.html`
-   - *Redirect URLs*: aggiungi il **wildcard** `https://agargiulo-adbe.github.io/adobe-eu-survey/*`
-     (il match è esatto: serve a coprire `admin.html` e i preview con `?event=`).
-4. **Moderatori**: la tabella `moderators` è l'allowlist. Già seedato
-   `agargiulo@adobe.com` (role `super_admin`). Per aggiungerne altri:
+2. **Account moderatore** — il login è **Email + Password** (nessuna email inviata,
+   indipendente dai filtri corporate). In **Authentication → Users → Add user**:
+   - Email (es. `agargiulo@adobe.com`), una password, **Auto Confirm User = ON**.
+3. **Allowlist** — l'email deve essere anche nella tabella `moderators` (già seedato
+   `agargiulo@adobe.com`, role `super_admin`). Per aggiungerne altri:
    ```sql
    insert into public.moderators (email, name, role)
    values ('nome@adobe.com', 'Nome', 'moderator');
    ```
+   poi creane l'utente con password (passo 2).
 
+> **Magic-link / SMTP / Redirect URL** non servono per il login: sono opzionali e utili
+> solo per l'eventuale *reset password* via email. Il provider di default Supabase
+> spesso non consegna ai domini corporate (`@adobe.com`) — per questo usiamo le password.
+>
 > Le credenziali in `config.js` (URL + **anon key**) sono pubbliche per design:
-> ogni scrittura è protetta da RLS + Auth. La password admin condivisa è stata rimossa.
+> ogni scrittura è protetta da RLS + Auth.
 
 ## Deploy — GitHub Pages
 
@@ -64,7 +66,7 @@ git push origin main
 
 ## Uso della console (`admin.html`)
 
-Login con email moderatore → magic-link. Tab disponibili:
+Login con **email + password** del moderatore. Tab disponibili:
 
 - **Evento** — hero, sottotitolo, data, luogo, badge, accent color, KPI (speaker/fasi),
   contatto footer, stato bozza/pubblicato; link recap + QR; **Duplica evento**.
@@ -92,4 +94,4 @@ Le modifiche pubblicate appaiono **in tempo reale** sul recap (nessun refresh).
 python3 -m http.server 8799
 # poi http://localhost:8799/recap.html  /  /admin.html
 ```
-Per il login in locale aggiungi `http://localhost:8799/*` ai Redirect URL di Supabase.
+Il login email+password funziona anche in locale senza configurazioni aggiuntive.
